@@ -1,15 +1,13 @@
-using System;
-using System.Collections.Generic;
+using TMPro;
 using System.IO;
 using UnityEngine;
-using TMPro;
-using UnityEngine.UI;
-using System.Threading.Tasks;
-
 using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
+using System.Threading.Tasks;
 using Google.Apis.Auth.OAuth2;
+using System.Collections.Generic;
 using Google.Apis.Sheets.v4.Data;
+
 
 public class GenerateMenu : MonoBehaviour
 {
@@ -24,7 +22,6 @@ public class GenerateMenu : MonoBehaviour
 
     public async Task<string> UpdateData(List<List<string>> data)
     {
-
         var objectList = new List<object>() { "updated", "Test" };
         var objectList2 = new List<object>() { "updated2", "Test2" };
         var valueRange = new ValueRange();
@@ -58,6 +55,10 @@ public class GenerateMenu : MonoBehaviour
     private async Task RefreshMenu()
     {
         Refreshed = true;
+
+        for (var i = Scroll.transform.childCount - 1; i >= 2; i--)
+            Destroy(Scroll.transform.GetChild(i).gameObject);
+
         var getRequest = _sheetsService.Spreadsheets.Values.Get(_spreadsheetId, range);
 
         var getResponse = await getRequest.ExecuteAsync();
