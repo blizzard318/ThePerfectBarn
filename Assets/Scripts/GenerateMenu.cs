@@ -7,13 +7,15 @@ using System.Threading.Tasks;
 using Google.Apis.Auth.OAuth2;
 using System.Collections.Generic;
 using Google.Apis.Sheets.v4.Data;
-
+using UnityEngine.UI;
 
 public class GenerateMenu : MonoBehaviour
 {
     [SerializeField] private GameObject CategoryPrefab, ItemEntryPrefab;
     [SerializeField] private RectTransform Scroll;
-    [SerializeField] private TextMeshProUGUI Subtitle;
+    [SerializeField] private TextMeshProUGUI Subtitle, Basket;
+    [SerializeField] private ItemEntry ItemEntry;
+    public List<(string Name, float Donation)> InsideBasket = new List<(string,float)>();
 
     private SheetsService _sheetsService;
     private const string _spreadsheetId = "1BO_oYW57E_xQZqt2UcAIrpRa6s5ZgK_nh4UD8Q5coZQ";
@@ -85,9 +87,14 @@ public class GenerateMenu : MonoBehaviour
                 {
                     var item = Instantiate(ItemEntryPrefab, Scroll);
                     var texts = item.GetComponentsInChildren<TextMeshProUGUI>();
-                    texts[0].text = value;
+                    texts[0].text = row[0].ToString(); //Name
                     if (!string.IsNullOrWhiteSpace(row[1].ToString())) texts[1].text = row[1].ToString();
                     if (!EVENT) texts[2].text = $"${row[2]} Donation";
+                    item.GetComponentInChildren<Button>().onClick.AddListener(() =>
+                    {
+                        ItemEntry.GenerateSegments(row);
+                        gameObject.SetActive(false);
+                    });
                 }
             }
         }
@@ -113,5 +120,16 @@ public class GenerateMenu : MonoBehaviour
 
         await RefreshMenu();
         //await UpdateData(new List<List<string>> { new List<string> { "test1" } });
+    }
+
+    public void AddToBasket (string name, float DonationCost)
+    {
+        Basket.transform.parent.gameObject.SetActive(true);
+        InsideBasket.Add((name, DonationCost));
+        float TotalDonationCost = 0;
+        foreach (var item in InsideBasket) TotalDonationCost += item.Donation;
+
+        string ItemString = InsideBasket.Count == 1 ? "Item" : "Items";
+        Basket.text = $"Basket ({InsideBasket.Count} {ItemString}): ${TotalDonationCost:0.00}";
     }
 }
