@@ -35,8 +35,8 @@ class Segment : MonoBehaviour
             {
                 Tick.gameObject.SetActive(Chosen = true);
                 foreach (var radioButton in RadioButtons) radioButton.sprite = Unselected;
-                selection.GetChild(0).GetComponent<Image>().sprite = Selected;
-                Values.name = selection.GetChild(1).GetComponent<TextMeshProUGUI>().text;
+                                                  selection.GetChild(0).GetComponent<Image>().sprite = Selected;
+                Values.name         =             selection.GetChild(1).GetComponent<TextMeshProUGUI>().text;
                 Values.donationCost = float.Parse(selection.GetChild(2).GetComponent<TextMeshProUGUI>().text);
                 GetComponentInParent<ItemEntry>().OnSelection.Invoke();
             });

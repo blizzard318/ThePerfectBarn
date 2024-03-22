@@ -9,13 +9,21 @@ using System.Collections.Generic;
 using Google.Apis.Sheets.v4.Data;
 using UnityEngine.UI;
 
+public sealed class OrderData
+{
+    public string Name;
+    public int Quantity;
+    public float BaseDonationCost;
+    public readonly List<string> Details = new List<string>();
+}
+
 public class GenerateMenu : MonoBehaviour
 {
     [SerializeField] private GameObject CategoryPrefab, ItemEntryPrefab;
     [SerializeField] private RectTransform Scroll;
     [SerializeField] private TextMeshProUGUI Subtitle, Basket;
     [SerializeField] private ItemEntry ItemEntry;
-    public List<(string Name, float Donation)> InsideBasket = new List<(string,float)>();
+    public List<OrderData> InsideBasket = new List<OrderData>();
 
     private SheetsService _sheetsService;
     private const string _spreadsheetId = "1BO_oYW57E_xQZqt2UcAIrpRa6s5ZgK_nh4UD8Q5coZQ";
@@ -88,8 +96,8 @@ public class GenerateMenu : MonoBehaviour
                     var item = Instantiate(ItemEntryPrefab, Scroll);
                     var texts = item.GetComponentsInChildren<TextMeshProUGUI>();
                     texts[0].text = row[0].ToString(); //Name
-                    if (!string.IsNullOrWhiteSpace(row[1].ToString())) texts[1].text = row[1].ToString();
-                    if (!EVENT) texts[2].text = $"${row[2]} Donation";
+                    texts[1].text = string.IsNullOrWhiteSpace(row[1].ToString()) ? row[0].ToString() : row[1].ToString(); //Description
+                    if (!EVENT) texts[2].text = $"${row[2]} <size=80%>Donation</size>";
                     item.GetComponentInChildren<Button>().onClick.AddListener(() =>
                     {
                         ItemEntry.GenerateSegments(row);
@@ -122,12 +130,12 @@ public class GenerateMenu : MonoBehaviour
         //await UpdateData(new List<List<string>> { new List<string> { "test1" } });
     }
 
-    public void AddToBasket (string name, float DonationCost)
+    public void AddToBasket (OrderData data)
     {
         Basket.transform.parent.gameObject.SetActive(true);
-        InsideBasket.Add((name, DonationCost));
+        InsideBasket.Add(data);
         float TotalDonationCost = 0;
-        foreach (var item in InsideBasket) TotalDonationCost += item.Donation;
+        foreach (var item in InsideBasket) TotalDonationCost += item.Quantity * item.BaseDonationCost;
 
         string ItemString = InsideBasket.Count == 1 ? "Item" : "Items";
         Basket.text = $"Basket ({InsideBasket.Count} {ItemString}): ${TotalDonationCost:0.00}";
