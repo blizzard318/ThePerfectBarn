@@ -68,7 +68,7 @@ public class GenerateMenu : MonoBehaviour
     {
         Refreshed = true;
 
-        for (var i = Scroll.transform.childCount - 1; i >= 2; i--)
+        for (var i = Scroll.transform.childCount - 1; i >= 3; i--)
             Destroy(Scroll.transform.GetChild(i).gameObject);
 
         var getRequest = _sheetsService.Spreadsheets.Values.Get(_spreadsheetId, range);
