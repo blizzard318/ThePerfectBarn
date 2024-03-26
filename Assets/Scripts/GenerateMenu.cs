@@ -14,7 +14,7 @@ public sealed class OrderData
     public string Name;
     public int Quantity;
     public float BaseDonationCost;
-    public readonly List<string> Details = new List<string>();
+    public readonly HashSet<string> Details = new HashSet<string>();
 }
 
 public class GenerateMenu : MonoBehaviour
@@ -23,7 +23,9 @@ public class GenerateMenu : MonoBehaviour
     [SerializeField] private RectTransform Scroll;
     [SerializeField] private TextMeshProUGUI Subtitle, Basket;
     [SerializeField] private ItemEntry ItemEntry;
-    public List<OrderData> InsideBasket = new List<OrderData>();
+    [SerializeField] private Basket BasketMenu;
+    public readonly Dictionary<string, GameObject> ItemEntries = new Dictionary<string, GameObject>();
+    public readonly Dictionary<string, List<OrderData>> InsideBasket = new Dictionary<string, List<OrderData>>();
 
     private SheetsService _sheetsService;
     private const string _spreadsheetId = "1BO_oYW57E_xQZqt2UcAIrpRa6s5ZgK_nh4UD8Q5coZQ";
@@ -96,6 +98,8 @@ public class GenerateMenu : MonoBehaviour
                     var item = Instantiate(ItemEntryPrefab, Scroll);
                     var texts = item.GetComponentsInChildren<TextMeshProUGUI>();
                     texts[0].text = row[0].ToString(); //Name
+                    ItemEntries.Add(texts[0].text, item);
+                    InsideBasket.Add(texts[0].text, new List<OrderData>());
                     texts[1].text = string.IsNullOrWhiteSpace(row[1].ToString()) ? row[0].ToString() : row[1].ToString(); //Description
                     if (!EVENT) texts[2].text = $"${row[2]} <size=80%>Donation</size>";
                     item.GetComponentInChildren<Button>().onClick.AddListener(() =>
@@ -133,11 +137,60 @@ public class GenerateMenu : MonoBehaviour
     public void AddToBasket (OrderData data)
     {
         Basket.transform.parent.gameObject.SetActive(true);
-        InsideBasket.Add(data);
-        float TotalDonationCost = 0;
-        foreach (var item in InsideBasket) TotalDonationCost += item.Quantity * item.BaseDonationCost;
 
-        string ItemString = InsideBasket.Count == 1 ? "Item" : "Items";
-        Basket.text = $"Basket ({InsideBasket.Count} {ItemString}): ${TotalDonationCost:0.00}";
+        bool unique = true;
+        foreach (var entry in InsideBasket[data.Name])
+        {
+            if (entry.Details.SetEquals(data.Details))
+            {
+                entry.Quantity += data.Quantity;
+                unique = false;
+                break;
+            }
+        }
+        if (unique) InsideBasket[data.Name].Add(data);
+
+        ColorUtility.TryParseHtmlString("#5CBD5A", out var Green);
+        int BasketQuantity = 0;
+        float TotalDonationCost = 0;
+        foreach (var itemEntry in InsideBasket)
+        {
+            var image = ItemEntries[itemEntry.Key].transform.GetChild(5).GetComponent<Image>();
+
+            if (itemEntry.Value.Count == 0)
+            {
+                image.color = Green;
+                image.GetComponentInChildren<TextMeshProUGUI>().text = "+";
+                image.GetComponentInChildren<TextMeshProUGUI>().fontSize = 100;
+                image.GetComponentInChildren<TextMeshProUGUI>().color = UnityEngine.Color.white;
+            }
+            else
+            {
+                int TotalQuantityOfItem = 0;
+                foreach (var item in itemEntry.Value) //Different details
+                {
+                    TotalQuantityOfItem += item.Quantity;
+                    TotalDonationCost += item.Quantity * item.BaseDonationCost;
+                }
+                BasketQuantity += TotalQuantityOfItem;
+
+                image.color = UnityEngine.Color.white;
+                image.GetComponentInChildren<TextMeshProUGUI>().text = TotalQuantityOfItem.ToString();
+                image.GetComponentInChildren<TextMeshProUGUI>().fontSize = 65;
+                image.GetComponentInChildren<TextMeshProUGUI>().color = UnityEngine.Color.black;
+
+            }
+        }
+
+        string ItemString = BasketQuantity == 1 ? "Item" : "Items";
+        Basket.text = $"Basket ({BasketQuantity} {ItemString}): ${TotalDonationCost:0.00}";
+    }
+
+    public void OpenBasket()
+    {
+        var basket = new List<OrderData>();
+        foreach (var order in InsideBasket) basket.AddRange(order.Value);
+        BasketMenu.GenerateOrders(basket.ToArray());
+        gameObject.SetActive(false);
     }
 }
