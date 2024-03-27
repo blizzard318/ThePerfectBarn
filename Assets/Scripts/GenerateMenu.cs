@@ -1,13 +1,15 @@
 using TMPro;
 using System.IO;
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.Networking;
 using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
 using System.Threading.Tasks;
 using Google.Apis.Auth.OAuth2;
-using System.Collections.Generic;
 using Google.Apis.Sheets.v4.Data;
-using UnityEngine.UI;
+using System.Collections;
+using System.Collections.Generic;
 
 public sealed class OrderData
 {
@@ -110,20 +112,18 @@ public class GenerateMenu : MonoBehaviour
                 }
             }
         }
+        else
+        {
+            Debug.Log(values == null);
+            if (values != null) Debug.Log(values.Count);
+        }
     }
 
     private async void Awake()
     {
-        GoogleCredential credential;
+        var json = Resources.Load<TextAsset>("credentials").text;
+        var credential = GoogleCredential.FromJson(json).CreateScoped(new[] { SheetsService.Scope.Spreadsheets });
 
-        // Put your credentials json file in the root of the solution and make sure copy to output dir property is set to always copy 
-        var filepath = Path.Combine(Application.streamingAssetsPath, "credentials.json");
-        using (var stream = new FileStream(filepath, FileMode.Open, FileAccess.Read))
-        {
-            credential = GoogleCredential.FromStream(stream).CreateScoped(new[] { SheetsService.Scope.Spreadsheets });
-        }
-
-        // Create Google Sheets API service.
         _sheetsService = new SheetsService(new BaseClientService.Initializer()
         {
             HttpClientInitializer = credential,
