@@ -28,9 +28,9 @@ public class ItemEntry : MonoBehaviour
             }
 
             var ColorCode = AbleToOrder ? "#53AD5A" : "#808080";
+            AddToBasketBtn.GetComponent<Button>().enabled = AbleToOrder;
             ColorUtility.TryParseHtmlString(ColorCode, out Color color);
             AddToBasketBtn.GetComponent<Image>().color = color;
-            AddToBasketBtn.GetComponent<Button>().enabled = AbleToOrder;
 
             var TotalDonationCost = SingleDonationCost * Quantity;
             AddToBasketBtn.GetComponentInChildren<TextMeshProUGUI>().text = $"Add to Basket - {TotalDonationCost:0.00}";
@@ -41,6 +41,8 @@ public class ItemEntry : MonoBehaviour
         Content.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
         foreach (var segment in Segments) Destroy(segment.gameObject);
         Segments.Clear();
+
+        QuantityText.text = (Quantity = 1).ToString();
 
         Name.text = chunk[0].ToString();
         Description.text = chunk[1].ToString();
@@ -65,8 +67,7 @@ public class ItemEntry : MonoBehaviour
 
     public void Plus()
     {
-        Quantity++;
-        QuantityText.text = Quantity.ToString();
+        QuantityText.text = (++Quantity).ToString();
         OnSelection.Invoke();
     }
     public void Minus()

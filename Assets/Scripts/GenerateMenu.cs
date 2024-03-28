@@ -77,45 +77,37 @@ public class GenerateMenu : MonoBehaviour
 
         var getResponse = await getRequest.ExecuteAsync();
         var values = getResponse.Values;
-        if (values != null && values.Count > 0)
-        {
-            EVENT = string.IsNullOrWhiteSpace(values[0][0].ToString());
-            Subtitle.text = values[0][1].ToString();
+        EVENT = string.IsNullOrWhiteSpace(values[0][0].ToString());
+        Subtitle.text = values[0][1].ToString();
 
-            for (int i = 1; i < values.Count; i++) //Skip first row, that's handled above.
+        for (int i = 1; i < values.Count; i++) //Skip first row, that's handled above.
+        {
+            var row = values[i];
+            if (row.Count == 0) continue;
+
+            var value = row[0].ToString();
+
+            const string CategoryPrefix = "Category:";
+            if (value.Contains(CategoryPrefix))
             {
-                var row = values[i];
-                if (row.Count == 0) continue;
-
-                var value = row[0].ToString();
-
-                const string CategoryPrefix = "Category:";
-                if (value.Contains(CategoryPrefix))
-                {
-                    var category = Instantiate(CategoryPrefab, Scroll);
-                    category.GetComponentInChildren<TextMeshProUGUI>().text = value.Split(CategoryPrefix)[1];
-                }
-                else
-                {
-                    var item = Instantiate(ItemEntryPrefab, Scroll);
-                    var texts = item.GetComponentsInChildren<TextMeshProUGUI>();
-                    texts[0].text = row[0].ToString(); //Name
-                    ItemEntries.Add(texts[0].text, item);
-                    InsideBasket.Add(texts[0].text, new List<OrderData>());
-                    texts[1].text = string.IsNullOrWhiteSpace(row[1].ToString()) ? row[0].ToString() : row[1].ToString(); //Description
-                    if (!EVENT) texts[2].text = $"${row[2]} <size=80%>Donation</size>";
-                    item.GetComponentInChildren<Button>().onClick.AddListener(() =>
-                    {
-                        ItemEntry.GenerateSegments(row);
-                        gameObject.SetActive(false);
-                    });
-                }
+                var category = Instantiate(CategoryPrefab, Scroll);
+                category.GetComponentInChildren<TextMeshProUGUI>().text = value.Split(CategoryPrefix)[1];
             }
-        }
-        else
-        {
-            Debug.Log(values == null);
-            if (values != null) Debug.Log(values.Count);
+            else
+            {
+                var item = Instantiate(ItemEntryPrefab, Scroll);
+                var texts = item.GetComponentsInChildren<TextMeshProUGUI>();
+                texts[0].text = row[0].ToString(); //Name
+                ItemEntries.Add(texts[0].text, item);
+                InsideBasket.Add(texts[0].text, new List<OrderData>());
+                texts[1].text = string.IsNullOrWhiteSpace(row[1].ToString()) ? row[0].ToString() : row[1].ToString(); //Description
+                if (!EVENT) texts[2].text = $"${row[2]} <size=80%>Donation</size>";
+                item.GetComponentInChildren<Button>().onClick.AddListener(() =>
+                {
+                    ItemEntry.GenerateSegments(row);
+                    gameObject.SetActive(false);
+                });
+            }
         }
     }
 
