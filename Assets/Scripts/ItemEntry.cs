@@ -19,6 +19,18 @@ public class ItemEntry : MonoBehaviour
     {
         OnSelection.AddListener(() =>
         {
+            const string Green = "#53AD5A", Grey = "#808080";
+
+            if (Quantity <= 0)
+            {
+                Quantity = 0;
+                ColorUtility.TryParseHtmlString(Green, out Color green);
+                AddToBasketBtn.GetComponent<Image>().color = green;
+                AddToBasketBtn.GetComponent<Button>().enabled = true;
+                AddToBasketBtn.GetComponentInChildren<TextMeshProUGUI>().text = $"Back to Menu";
+                return;
+            }
+
             bool AbleToOrder = true;
             SingleDonationCost = BaseDonation;
             foreach (var segment in Segments)
@@ -27,7 +39,7 @@ public class ItemEntry : MonoBehaviour
                 if (!segment.Chosen) AbleToOrder = false;
             }
 
-            var ColorCode = AbleToOrder ? "#53AD5A" : "#808080";
+            var ColorCode = AbleToOrder ? Green : Grey;
             AddToBasketBtn.GetComponent<Button>().enabled = AbleToOrder;
             ColorUtility.TryParseHtmlString(ColorCode, out Color color);
             AddToBasketBtn.GetComponent<Image>().color = color;
@@ -73,15 +85,16 @@ public class ItemEntry : MonoBehaviour
     public void Minus()
     {
         Quantity--;
-        if (Quantity < 1) Quantity = 1;
+        if (Quantity <= 0)
+        {
+            Quantity = 0;
+        }
         QuantityText.text = Quantity.ToString();
         OnSelection.Invoke();
     }
 
     public void AddToBasket()
     {
-        var chunk = new List<string>() { Name.text };
-
         var data = new OrderData()
         {
             Name = Name.text,

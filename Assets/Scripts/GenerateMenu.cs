@@ -1,14 +1,11 @@
 using TMPro;
-using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.Networking;
 using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
 using System.Threading.Tasks;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Sheets.v4.Data;
-using System.Collections;
 using System.Collections.Generic;
 
 public sealed class OrderData
@@ -26,6 +23,11 @@ public class GenerateMenu : MonoBehaviour
     [SerializeField] private TextMeshProUGUI Subtitle, Basket;
     [SerializeField] private ItemEntry ItemEntry;
     [SerializeField] private Basket BasketMenu;
+
+    [SerializeField] private GameObject ExistingDrinks;
+    [SerializeField] private TextMeshProUGUI ExistingDrinkTitle, ExistingDrinkCost;
+    [SerializeField] private Button ExistingDrinkButton;
+
     public readonly Dictionary<string, GameObject> ItemEntries = new Dictionary<string, GameObject>();
     public readonly Dictionary<string, List<OrderData>> InsideBasket = new Dictionary<string, List<OrderData>>();
 
@@ -104,8 +106,23 @@ public class GenerateMenu : MonoBehaviour
                 if (!EVENT) texts[2].text = $"${row[2]} <size=80%>Donation</size>";
                 item.GetComponentInChildren<Button>().onClick.AddListener(() =>
                 {
-                    ItemEntry.GenerateSegments(row);
-                    gameObject.SetActive(false);
+                    if (InsideBasket[row[0].ToString()].Count > 0)
+                    {
+                        ExistingDrinks.SetActive(true);
+
+                        ExistingDrinkTitle.text = row[0].ToString();
+                        ExistingDrinkCost.text = row[2].ToString();
+
+                        ExistingDrinkButton.onClick.RemoveAllListeners();
+                        ExistingDrinkButton.onClick.AddListener(() => ItemEntry.GenerateSegments(row));
+
+                        LayoutRebuilder.ForceRebuildLayoutImmediate(ExistingDrinkButton.transform.parent.GetComponent<RectTransform>());
+                    }
+                    else
+                    {
+                        ItemEntry.GenerateSegments(row);
+                        gameObject.SetActive(false);
+                    }
                 });
             }
         }
@@ -113,6 +130,7 @@ public class GenerateMenu : MonoBehaviour
 
     private async void Awake()
     {
+        Application.targetFrameRate = 60;
         var json = Resources.Load<TextAsset>("credentials").text;
         var credential = GoogleCredential.FromJson(json).CreateScoped(new[] { SheetsService.Scope.Spreadsheets });
 
@@ -128,15 +146,14 @@ public class GenerateMenu : MonoBehaviour
 
     public void AddToBasket (OrderData data)
     {
-        Basket.transform.parent.gameObject.SetActive(true);
-
         bool unique = true;
         foreach (var entry in InsideBasket[data.Name])
         {
             if (entry.Details.SetEquals(data.Details))
             {
-                entry.Quantity += data.Quantity;
+                entry.Quantity = data.Quantity;
                 unique = false;
+                if (data.Quantity == 0) InsideBasket[data.Name].Remove(entry);
                 break;
             }
         }
@@ -170,10 +187,10 @@ public class GenerateMenu : MonoBehaviour
                 image.GetComponentInChildren<TextMeshProUGUI>().text = TotalQuantityOfItem.ToString();
                 image.GetComponentInChildren<TextMeshProUGUI>().fontSize = 65;
                 image.GetComponentInChildren<TextMeshProUGUI>().color = UnityEngine.Color.black;
-
             }
         }
 
+        Basket.transform.parent.gameObject.SetActive(BasketQuantity > 0);
         string ItemString = BasketQuantity == 1 ? "Item" : "Items";
         Basket.text = $"Basket ({BasketQuantity} {ItemString}): ${TotalDonationCost:0.00}";
     }
