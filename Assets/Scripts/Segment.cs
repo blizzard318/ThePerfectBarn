@@ -14,7 +14,7 @@ class Segment : MonoBehaviour
     public (string name, float donationCost) Values;
     public bool Chosen = false;
 
-    public void GenerateSelection(string Chunk)
+    public void GenerateSelection(string Chunk, HashSet<string> Preset = null)
     {
         string[] split = Chunk.Split(":");
         Name.text = split[0];
@@ -29,18 +29,20 @@ class Segment : MonoBehaviour
         {
             var selection = Instantiate(SelectionPrefab, transform).transform;
             selection.SetSiblingIndex(transform.childCount - 2);
-            RadioButtons.Add(selection.GetChild(0).GetComponent<Image>());
+            RadioButtons.Add(selection.GetChild(1).GetComponent<Image>());
 
             string[] values = Choices[0].Split("$");
-            selection.GetChild(1).GetComponent<TextMeshProUGUI>().text = values[0];
+            selection.GetChild(2).GetComponent<TextMeshProUGUI>().text = values[0];
+
+            selection.GetChild(3).GetComponent<TextMeshProUGUI>().enabled = !GlobalOrderData.EVENT;
             var DonationCost = values.Length > 1 ? values[1] : "0.00";
-            selection.GetChild(2).GetComponent<TextMeshProUGUI>().text = DonationCost;
+            selection.GetChild(3).GetComponent<TextMeshProUGUI>().text = DonationCost; //donation
 
             selection.GetChild(0).GetComponent<Button>().enabled = false;
             Tick.gameObject.SetActive(Chosen = true);
-            selection.GetChild(0).GetComponent<Image>().sprite = Selected;
-            Values.name = selection.GetChild(1).GetComponent<TextMeshProUGUI>().text;
-            Values.donationCost = float.Parse(selection.GetChild(2).GetComponent<TextMeshProUGUI>().text);
+            selection.GetChild(1).GetComponent<Image>().sprite = Selected;
+            Values.name = selection.GetChild(2).GetComponent<TextMeshProUGUI>().text;
+            Values.donationCost = float.Parse(selection.GetChild(3).GetComponent<TextMeshProUGUI>().text);
             GetComponentInParent<ItemEntry>(true).OnSelection.Invoke();
         }
         else
@@ -49,22 +51,34 @@ class Segment : MonoBehaviour
             {
                 var selection = Instantiate(SelectionPrefab, transform).transform;
                 selection.SetSiblingIndex(transform.childCount - 2);
-                RadioButtons.Add(selection.GetChild(0).GetComponent<Image>());
+                RadioButtons.Add(selection.GetChild(1).GetComponent<Image>());
 
                 string[] values = choice.Split("$");
-                selection.GetChild(1).GetComponent<TextMeshProUGUI>().text = values[0];
+                selection.GetChild(2).GetComponent<TextMeshProUGUI>().text = values[0]; //name
+
+                selection.GetChild(3).GetComponent<TextMeshProUGUI>().enabled = !GlobalOrderData.EVENT;
                 var DonationCost = values.Length > 1 ? values[1] : "0.00";
-                selection.GetChild(2).GetComponent<TextMeshProUGUI>().text = DonationCost;
+                selection.GetChild(3).GetComponent<TextMeshProUGUI>().text = DonationCost; //donation
 
                 selection.GetChild(0).GetComponent<Button>().onClick.AddListener(() =>
                 {
                     Tick.gameObject.SetActive(Chosen = true);
                     foreach (var radioButton in RadioButtons) radioButton.sprite = Unselected;
-                    selection.GetChild(0).GetComponent<Image>().sprite = Selected;
-                    Values.name = selection.GetChild(1).GetComponent<TextMeshProUGUI>().text;
-                    Values.donationCost = float.Parse(selection.GetChild(2).GetComponent<TextMeshProUGUI>().text);
+                    selection.GetChild(1).GetComponent<Image>().sprite = Selected;
+                    Values.name = selection.GetChild(2).GetComponent<TextMeshProUGUI>().text;
+                    Values.donationCost = float.Parse(selection.GetChild(3).GetComponent<TextMeshProUGUI>().text);
                     GetComponentInParent<ItemEntry>().OnSelection.Invoke();
                 });
+
+                if (Preset?.Contains(values[0]) == true)
+                {
+                    Preset = null;
+                    Tick.gameObject.SetActive(Chosen = true);
+                    selection.GetChild(1).GetComponent<Image>().sprite = Selected;
+                    Values.name = selection.GetChild(2).GetComponent<TextMeshProUGUI>().text;
+                    Values.donationCost = float.Parse(selection.GetChild(3).GetComponent<TextMeshProUGUI>().text);
+                    GetComponentInParent<ItemEntry>(true).OnSelection.Invoke();
+                }
             }
         }
     }

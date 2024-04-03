@@ -14,6 +14,7 @@ public sealed class OrderData
     public int Quantity;
     public float BaseDonationCost;
     public readonly HashSet<string> Details = new HashSet<string>();
+    public string Chunk;
 }
 
 public class GenerateMenu : MonoBehaviour
@@ -21,19 +22,14 @@ public class GenerateMenu : MonoBehaviour
     [SerializeField] private GameObject CategoryPrefab, ItemEntryPrefab;
     [SerializeField] private RectTransform Scroll;
     [SerializeField] private TextMeshProUGUI Subtitle, Basket;
-    [SerializeField] private ItemEntry ItemEntry;
     [SerializeField] private Basket BasketMenu;
-
-    [SerializeField] private GameObject ExistingDrinks;
-    [SerializeField] private TextMeshProUGUI ExistingDrinkTitle, ExistingDrinkCost;
-    [SerializeField] private Button ExistingDrinkButton;
+    [SerializeField] private ExistingDrinksMenu ExistingDrinksMenu;
 
     public readonly Dictionary<string, GameObject> ItemEntries = new Dictionary<string, GameObject>();
-    public readonly Dictionary<string, List<OrderData>> InsideBasket = new Dictionary<string, List<OrderData>>();
 
     private SheetsService _sheetsService;
     private const string _spreadsheetId = "1BO_oYW57E_xQZqt2UcAIrpRa6s5ZgK_nh4UD8Q5coZQ";
-    private bool EVENT = false, Refreshed = false;
+    private bool Refreshed = false;
     const string range = "Menu!A1:F";
 
     public async Task<string> UpdateData(List<List<string>> data)
@@ -79,9 +75,11 @@ public class GenerateMenu : MonoBehaviour
 
         var getResponse = await getRequest.ExecuteAsync();
         var values = getResponse.Values;
-        EVENT = string.IsNullOrWhiteSpace(values[0][0].ToString());
+        GlobalOrderData.EVENT = !string.IsNullOrWhiteSpace(values[0][0].ToString());
         Subtitle.text = values[0][1].ToString();
 
+        GlobalOrderData.MenuItems.Clear();
+        GlobalOrderData.InsideBasket.Clear();
         for (int i = 1; i < values.Count; i++) //Skip first row, that's handled above.
         {
             var row = values[i];
@@ -101,28 +99,20 @@ public class GenerateMenu : MonoBehaviour
                 var texts = item.GetComponentsInChildren<TextMeshProUGUI>();
                 texts[0].text = row[0].ToString(); //Name
                 ItemEntries.Add(texts[0].text, item);
-                InsideBasket.Add(texts[0].text, new List<OrderData>());
+                GlobalOrderData.MenuItems.Add(texts[0].text, row);
+                GlobalOrderData.InsideBasket.Add(texts[0].text, new List<OrderData>());
+
                 texts[1].text = string.IsNullOrWhiteSpace(row[1].ToString()) ? row[0].ToString() : row[1].ToString(); //Description
-                if (!EVENT) texts[2].text = $"${row[2]} <size=80%>Donation</size>";
+                texts[2].text = GlobalOrderData.EVENT ? string.Empty : $"${row[2]:0.00} <size=80%>Donation</size>";
+
                 item.GetComponentInChildren<Button>().onClick.AddListener(() =>
                 {
-                    if (InsideBasket[row[0].ToString()].Count > 0)
-                    {
-                        ExistingDrinks.SetActive(true);
+                    GlobalOrderData.ClearActiveItem();
+                    GlobalOrderData.ActiveItem = row[0].ToString();
 
-                        ExistingDrinkTitle.text = row[0].ToString();
-                        ExistingDrinkCost.text = row[2].ToString();
-
-                        ExistingDrinkButton.onClick.RemoveAllListeners();
-                        ExistingDrinkButton.onClick.AddListener(() => ItemEntry.GenerateSegments(row));
-
-                        LayoutRebuilder.ForceRebuildLayoutImmediate(ExistingDrinkButton.transform.parent.GetComponent<RectTransform>());
-                    }
-                    else
-                    {
-                        ItemEntry.GenerateSegments(row);
-                        gameObject.SetActive(false);
-                    }
+                    if (GlobalOrderData.InsideBasket[row[0].ToString()].Count > 0)
+                        ExistingDrinksMenu.ShowExistingDrinks();
+                    else GetComponentInParent<PageManager>().GoToPage(PageManager.Page.PageTitle.ITEM);
                 });
             }
         }
@@ -144,25 +134,13 @@ public class GenerateMenu : MonoBehaviour
         //await UpdateData(new List<List<string>> { new List<string> { "test1" } });
     }
 
-    public void AddToBasket (OrderData data)
+    public void OnEnable ()
     {
-        bool unique = true;
-        foreach (var entry in InsideBasket[data.Name])
-        {
-            if (entry.Details.SetEquals(data.Details))
-            {
-                entry.Quantity = data.Quantity;
-                unique = false;
-                if (data.Quantity == 0) InsideBasket[data.Name].Remove(entry);
-                break;
-            }
-        }
-        if (unique) InsideBasket[data.Name].Add(data);
-
+        GetComponentInChildren<TMP_InputField>().text = GlobalOrderData.CustomerName;
         ColorUtility.TryParseHtmlString("#5CBD5A", out var Green);
         int BasketQuantity = 0;
         float TotalDonationCost = 0;
-        foreach (var itemEntry in InsideBasket)
+        foreach (var itemEntry in GlobalOrderData.InsideBasket)
         {
             var image = ItemEntries[itemEntry.Key].transform.GetChild(5).GetComponent<Image>();
 
@@ -184,22 +162,22 @@ public class GenerateMenu : MonoBehaviour
                 BasketQuantity += TotalQuantityOfItem;
 
                 image.color = UnityEngine.Color.white;
-                image.GetComponentInChildren<TextMeshProUGUI>().text = TotalQuantityOfItem.ToString();
-                image.GetComponentInChildren<TextMeshProUGUI>().fontSize = 65;
+                image.GetComponentInChildren<TextMeshProUGUI>().fontSize = 60;
                 image.GetComponentInChildren<TextMeshProUGUI>().color = UnityEngine.Color.black;
+                image.GetComponentInChildren<TextMeshProUGUI>().text = TotalQuantityOfItem.ToString();
             }
         }
 
         Basket.transform.parent.gameObject.SetActive(BasketQuantity > 0);
         string ItemString = BasketQuantity == 1 ? "Item" : "Items";
-        Basket.text = $"Basket ({BasketQuantity} {ItemString}): ${TotalDonationCost:0.00}";
+
+        if (GlobalOrderData.EVENT)
+            Basket.text = $"Basket ({BasketQuantity} {ItemString})";
+        else
+            Basket.text = $"Basket ({BasketQuantity} {ItemString}): ${TotalDonationCost:0.00}";
     }
 
-    public void OpenBasket()
-    {
-        var basket = new List<OrderData>();
-        foreach (var order in InsideBasket) basket.AddRange(order.Value);
-        BasketMenu.GenerateOrders(basket.ToArray());
-        gameObject.SetActive(false);
-    }
+    public void NameDone(string InputName) => GlobalOrderData.CustomerName = InputName;
+
+    public void OpenBasket() => GetComponentInParent<PageManager>().GoToPage(PageManager.Page.PageTitle.BASKET);
 }

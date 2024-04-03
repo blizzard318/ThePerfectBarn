@@ -6,14 +6,15 @@ using System.Collections.Generic;
 
 public class ItemEntry : MonoBehaviour
 {
-    [SerializeField] private GenerateMenu MenuScroll;
     [SerializeField] private GameObject AddToBasketBtn, Content;
     [SerializeField] private Segment segment;
     [HideInInspector] public UnityEvent OnSelection;
     private List<Segment> Segments = new List<Segment>();
-    [SerializeField] private TextMeshProUGUI Name, Description, BaseDonationText, QuantityText;
+    [SerializeField] private TextMeshProUGUI Name, Description, BaseDonationQty, BaseDonationText, QuantityText;
     private int Quantity = 1;
     private float BaseDonation, SingleDonationCost;
+    private bool AddOn = false;
+    private HashSet<string> OldPreset;
 
     private void Awake()
     {
@@ -44,37 +45,44 @@ public class ItemEntry : MonoBehaviour
             ColorUtility.TryParseHtmlString(ColorCode, out Color color);
             AddToBasketBtn.GetComponent<Image>().color = color;
 
-            var TotalDonationCost = SingleDonationCost * Quantity;
-            AddToBasketBtn.GetComponentInChildren<TextMeshProUGUI>().text = $"Add to Basket - {TotalDonationCost:0.00}";
+            if (GlobalOrderData.EVENT)
+                AddToBasketBtn.GetComponentInChildren<TextMeshProUGUI>().text = "Add to Basket";
+            else
+            {
+                var TotalDonationCost = SingleDonationCost * Quantity;
+                AddToBasketBtn.GetComponentInChildren<TextMeshProUGUI>().text = $"Add to Basket - {TotalDonationCost:0.00}";
+            }
         });
     }
-    public void GenerateSegments(IList<object> chunk)
+    public void OnEnable()
     {
+        OldPreset = GlobalOrderData.Details;
         Content.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
         foreach (var segment in Segments) Destroy(segment.gameObject);
         Segments.Clear();
 
-        QuantityText.text = (Quantity = 1).ToString();
+        AddOn = GlobalOrderData.ExistingQuantity == 0;
+        if (AddOn) GlobalOrderData.ExistingQuantity = 1;
+        QuantityText.text = (Quantity = GlobalOrderData.ExistingQuantity).ToString();
 
+        var chunk = GlobalOrderData.ActiveItemChunk;
         Name.text = chunk[0].ToString();
         Description.text = chunk[1].ToString();
-        BaseDonation = float.Parse(BaseDonationText.text = chunk[2].ToString());
+
+        BaseDonationText.enabled = BaseDonationQty.enabled = !GlobalOrderData.EVENT;
+        if (GlobalOrderData.EVENT) BaseDonation = 0;
+        else BaseDonationQty.text = $"{BaseDonation = float.Parse(chunk[2].ToString()):0.00}";
+
         for (int i = 3, c = -1; i < chunk.Count; i++, c++)
         {
             var _segment = Instantiate(segment, Content.transform);
             Segments.Add(_segment);
             _segment.transform.SetSiblingIndex(_segment.transform.childCount + c);
-            _segment.GenerateSelection(chunk[i].ToString());
+            _segment.GenerateSelection(chunk[i].ToString(), GlobalOrderData.Details);
         }
         LayoutRebuilder.ForceRebuildLayoutImmediate(Content.GetComponent<RectTransform>());
         gameObject.SetActive(true);
         OnSelection.Invoke();
-    }
-
-    public void Close()
-    {
-        MenuScroll.gameObject.SetActive(true);
-        gameObject.SetActive(false);
     }
 
     public void Plus()
@@ -85,16 +93,19 @@ public class ItemEntry : MonoBehaviour
     public void Minus()
     {
         Quantity--;
-        if (Quantity <= 0)
-        {
-            Quantity = 0;
-        }
+        if (Quantity <= 0) Quantity = 0;
         QuantityText.text = Quantity.ToString();
         OnSelection.Invoke();
     }
 
     public void AddToBasket()
     {
+        if (OldPreset == null && Quantity == 0)
+        {
+            GetComponentInParent<PageManager>().GoPrevious();
+            return;
+        }
+
         var data = new OrderData()
         {
             Name = Name.text,
@@ -103,7 +114,31 @@ public class ItemEntry : MonoBehaviour
         };
         foreach (var segment in Segments) data.Details.Add(segment.Values.name);
 
-        MenuScroll.AddToBasket(data);
-        Close();
+        bool unique = true;
+        OrderData ToRemove = null;
+        foreach (var entry in GlobalOrderData.InsideBasket[data.Name])
+        {
+            if (OldPreset?.SetEquals(entry.Details) == true)
+            {
+                OldPreset = null;
+                entry.Quantity = 0;
+                if (entry.Details.SetEquals(data.Details))
+                {
+                    unique = false;
+                    entry.Quantity += data.Quantity; //Add to preset
+                }
+                else ToRemove = entry; //Remove old preset
+            }
+            else if (entry.Details.SetEquals(data.Details))
+            {
+                unique = false;
+                entry.Quantity += data.Quantity; //Add to different existing
+                if (entry.Quantity == 0) ToRemove = entry;
+            }
+        }
+        if (ToRemove != null) GlobalOrderData.InsideBasket[data.Name].Remove(ToRemove);
+        if (unique) GlobalOrderData.InsideBasket[data.Name].Add(data);
+
+        GetComponentInParent<PageManager>().GoPrevious();
     }
 }

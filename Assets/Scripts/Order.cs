@@ -1,19 +1,27 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Order : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI Quantity, Name, Details, DonationTotal;
+    [SerializeField] private Button Edit;
     public void GenerateOrder (OrderData data)
     {
-        const int BaseSize = 250;
-        int AddOn = 50 * (data.Details.Count - 1);
-        int NewHeight = BaseSize + AddOn;
-        GetComponent<RectTransform>().sizeDelta = new Vector2(0, NewHeight);
-
+        transform.SetAsLastSibling();
         Quantity.text = data.Quantity.ToString() + "x";
         Name.text = data.Name;
-        Details.text = string.Join(System.Environment.NewLine, Details);
+        Details.text = string.Join(", ", data.Details);
+
+        DonationTotal.enabled = !GlobalOrderData.EVENT;
         DonationTotal.text = $"{data.BaseDonationCost * data.Quantity:0.00}";
+
+        Edit.onClick.AddListener(() =>
+        {
+            GlobalOrderData.ActiveItem = data.Name;
+            GlobalOrderData.ExistingQuantity = data.Quantity;
+            GlobalOrderData.Details = data.Details;
+            GetComponentInParent<PageManager>().GoToPage(PageManager.Page.PageTitle.ITEM);
+        });
     }
 }
