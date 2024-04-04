@@ -122,7 +122,7 @@ public class ItemEntry : MonoBehaviour
             {
                 OldPreset = null;
                 entry.Quantity = 0;
-                if (entry.Details.SetEquals(data.Details))
+                if (data.Quantity > 0 && entry.Details.SetEquals(data.Details))
                 {
                     unique = false;
                     entry.Quantity += data.Quantity; //Add to preset

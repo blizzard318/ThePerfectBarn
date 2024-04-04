@@ -8,7 +8,7 @@ public class Basket : MonoBehaviour
     [SerializeField] private Order OrderPrefab;
     [SerializeField] private TextMeshProUGUI BasketQuantity, TotalText, BasketCost;
     [SerializeField] private ItemEntry ItemMenu;
-    private List<Order> Orders = new List<Order>();
+    private readonly List<Order> Orders = new List<Order>();
 
     public void OnEnable()
     {
@@ -44,5 +44,9 @@ public class Basket : MonoBehaviour
         gameObject.SetActive(true);
     }
     public void ReturnToMenu() => GetComponentInParent<PageManager>().GoToPage(PageManager.Page.PageTitle.MENU);
-    public void ConfirmOrder() => GetComponentInParent<PageManager>().GoToPage(PageManager.Page.PageTitle.RECEIPT);
+    public void ConfirmOrder()
+    {
+        GlobalOrderData.PlaceOrder();
+        GetComponentInParent<PageManager>().GoToPage(PageManager.Page.PageTitle.RECEIPT);
+    }
 }

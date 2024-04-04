@@ -1,6 +1,6 @@
 using System;
 using UnityEngine;
-using static PageManager.Page;
+using UnityEngine.SceneManagement;
 
 public class PageManager : MonoBehaviour
 {
@@ -13,8 +13,9 @@ public class PageManager : MonoBehaviour
     [SerializeField] private Page[] Pages;
     private GameObject CurrentPage, PreviousPage;
 
-    private void Awake()
+    private async void Awake()
     {
+        await GlobalOrderData.Initialize(Resources.Load<TextAsset>("credentials").text);
         foreach (var page in Pages)
         {
             if (page.page.activeSelf)
@@ -25,7 +26,7 @@ public class PageManager : MonoBehaviour
         }
     }
 
-    public void GoToPage(PageTitle title)
+    public void GoToPage(Page.PageTitle title)
     {
         CurrentPage?.SetActive(false);
         PreviousPage = CurrentPage;
@@ -46,4 +47,7 @@ public class PageManager : MonoBehaviour
         PreviousPage = CurrentPage;
         CurrentPage = interim;
     }
+
+    public void LoadCustomer() => SceneManager.LoadScene("Customer");
+    public void LoadCashier() => SceneManager.LoadScene("Cashier");
 }

@@ -11,7 +11,7 @@ public class Order : MonoBehaviour
         transform.SetAsLastSibling();
         Quantity.text = data.Quantity.ToString() + "x";
         Name.text = data.Name;
-        Details.text = string.Join(", ", data.Details);
+        Details.text = data.JoinedDetails;
 
         DonationTotal.enabled = !GlobalOrderData.EVENT;
         DonationTotal.text = $"{data.BaseDonationCost * data.Quantity:0.00}";

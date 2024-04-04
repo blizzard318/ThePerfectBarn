@@ -36,7 +36,7 @@ public class ExistingDrinksMenu : MonoBehaviour
             });
 
             existingDrink.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = order.Name;
-            existingDrink.transform.GetChild(2).GetComponent<TextMeshProUGUI>().text = string.Join(", ", order.Details);
+            existingDrink.transform.GetChild(2).GetComponent<TextMeshProUGUI>().text = order.JoinedDetails;
             existingDrink.transform.GetChild(3).GetComponentInChildren<TextMeshProUGUI>().text = order.Quantity.ToString();
 
             existingDrink.transform.GetChild(4).GetComponent<TextMeshProUGUI>().enabled = !GlobalOrderData.EVENT;
