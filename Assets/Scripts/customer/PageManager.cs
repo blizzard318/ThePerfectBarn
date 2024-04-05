@@ -6,10 +6,11 @@ public class PageManager : MonoBehaviour
 {
     [Serializable] public class Page
     {
-        public enum PageTitle { MENU, ITEM, BASKET, RECEIPT };
+        public enum PageTitle { INPUT, MENU, ITEM, BASKET, RECEIPT, CUSTOMERS, INDIVIDUAL };
         public PageTitle Title;
         public GameObject page;
     }
+    [SerializeField] private Page.PageTitle StartingPage;
     [SerializeField] private Page[] Pages;
     private GameObject CurrentPage, PreviousPage;
 
@@ -18,17 +19,18 @@ public class PageManager : MonoBehaviour
         await GlobalOrderData.Initialize(Resources.Load<TextAsset>("credentials").text);
         foreach (var page in Pages)
         {
-            if (page.page.activeSelf)
+            if (page.Title == StartingPage)
             {
-                CurrentPage = page.page;
-                break;
+                PreviousPage = CurrentPage = page.page;
+                CurrentPage.SetActive(true);
             }
+            else page.page.SetActive(false);
         }
     }
 
     public void GoToPage(Page.PageTitle title)
     {
-        CurrentPage?.SetActive(false);
+        CurrentPage.SetActive(false);
         PreviousPage = CurrentPage;
         foreach (var page in Pages)
         {
@@ -41,12 +43,19 @@ public class PageManager : MonoBehaviour
     }
     public void GoPrevious()
     {
-        CurrentPage?.SetActive(false);
-        PreviousPage?.SetActive(true);
+        CurrentPage.SetActive(false);
+        PreviousPage.SetActive(true);
         var interim = PreviousPage;
         PreviousPage = CurrentPage;
         CurrentPage = interim;
     }
+    public void GoToINPUT() => GoToPage(Page.PageTitle.INPUT);
+    public void GoToMENU() => GoToPage(Page.PageTitle.MENU);
+    public void GoToITEM() => GoToPage(Page.PageTitle.ITEM);
+    public void GoToBASKET() => GoToPage(Page.PageTitle.BASKET);
+    public void GoToRECEIPT() => GoToPage(Page.PageTitle.RECEIPT);
+    public void GoToCUSTOMERS() => GoToPage(Page.PageTitle.CUSTOMERS);
+    public void GoToINDIVIDUAL() => GoToPage(Page.PageTitle.INDIVIDUAL);
 
     public void LoadCustomer() => SceneManager.LoadScene("Customer");
     public void LoadCashier() => SceneManager.LoadScene("Cashier");

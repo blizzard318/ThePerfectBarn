@@ -43,7 +43,6 @@ public class Basket : MonoBehaviour
         }
         gameObject.SetActive(true);
     }
-    public void ReturnToMenu() => GetComponentInParent<PageManager>().GoToPage(PageManager.Page.PageTitle.MENU);
     public void ConfirmOrder()
     {
         GlobalOrderData.PlaceOrder();

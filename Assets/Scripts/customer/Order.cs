@@ -4,19 +4,18 @@ using UnityEngine.UI;
 
 public class Order : MonoBehaviour
 {
-    [SerializeField] private TextMeshProUGUI Quantity, Name, Details, DonationTotal;
-    [SerializeField] private Button Edit;
+    [SerializeField] private TextMeshProUGUI Quantity, Name, DonationTotal;
     public void GenerateOrder (OrderData data)
     {
         transform.SetAsLastSibling();
         Quantity.text = data.Quantity.ToString() + "x";
-        Name.text = data.Name;
-        Details.text = data.JoinedDetails;
+        Name.text = $"<b>{data.Name}</b>" + System.Environment.NewLine + $"<size=90%><color=\"grey\">{data.JoinedDetails}</size>";
 
-        DonationTotal.enabled = !GlobalOrderData.EVENT;
-        DonationTotal.text = $"{data.BaseDonationCost * data.Quantity:0.00}";
+        var TotalCost = data.BaseDonationCost * data.Quantity;
+        DonationTotal.text = GlobalOrderData.EVENT ? string.Empty : $"{TotalCost:0.00}";
+        DonationTotal.text += System.Environment.NewLine + "<color=#419DEA><size=90%><u>Edit</u></size>";
 
-        Edit.onClick.AddListener(() =>
+        GetComponent<Button>().onClick.AddListener(() =>
         {
             GlobalOrderData.ActiveItem = data.Name;
             GlobalOrderData.ExistingQuantity = data.Quantity;

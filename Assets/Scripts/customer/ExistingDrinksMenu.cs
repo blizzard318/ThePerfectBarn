@@ -35,13 +35,12 @@ public class ExistingDrinksMenu : MonoBehaviour
                 GetComponentInParent<PageManager>().GoToPage(PageManager.Page.PageTitle.ITEM);
             });
 
-            existingDrink.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = order.Name;
-            existingDrink.transform.GetChild(2).GetComponent<TextMeshProUGUI>().text = order.JoinedDetails;
-            existingDrink.transform.GetChild(3).GetComponentInChildren<TextMeshProUGUI>().text = order.Quantity.ToString();
+            existingDrink.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = $"{order.JoinedDetails}";
+            existingDrink.transform.GetChild(1).GetComponentInChildren<TextMeshProUGUI>().text = order.Quantity.ToString();
 
-            existingDrink.transform.GetChild(4).GetComponent<TextMeshProUGUI>().enabled = !GlobalOrderData.EVENT;
+            existingDrink.transform.GetChild(2).GetComponent<TextMeshProUGUI>().enabled = !GlobalOrderData.EVENT;
             float totalCost = order.Quantity * order.BaseDonationCost;
-            existingDrink.transform.GetChild(4).GetComponent<TextMeshProUGUI>().text = $"{totalCost:0.00}";
+            existingDrink.transform.GetChild(2).GetComponent<TextMeshProUGUI>().text = $"{totalCost:0.00}";
         }
 
         MakeAnotherButton.onClick.RemoveAllListeners();

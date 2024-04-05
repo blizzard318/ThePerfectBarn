@@ -10,7 +10,7 @@ public class ItemEntry : MonoBehaviour
     [SerializeField] private Segment segment;
     [HideInInspector] public UnityEvent OnSelection;
     private List<Segment> Segments = new List<Segment>();
-    [SerializeField] private TextMeshProUGUI Name, Description, BaseDonationQty, BaseDonationText, QuantityText;
+    [SerializeField] private TextMeshProUGUI Name, BaseDonationQty, QuantityText;
     private int Quantity = 1;
     private float BaseDonation, SingleDonationCost;
     private bool AddOn = false;
@@ -66,12 +66,11 @@ public class ItemEntry : MonoBehaviour
         QuantityText.text = (Quantity = GlobalOrderData.ExistingQuantity).ToString();
 
         var chunk = GlobalOrderData.ActiveItemChunk;
-        Name.text = chunk[0].ToString();
-        Description.text = chunk[1].ToString();
+        Name.text = $"<b>{chunk[0]}</b>" + System.Environment.NewLine + $"<size=80%><color=\"grey\">{chunk[1]}</size>";
 
-        BaseDonationText.enabled = BaseDonationQty.enabled = !GlobalOrderData.EVENT;
+        BaseDonationQty.enabled = !GlobalOrderData.EVENT;
         if (GlobalOrderData.EVENT) BaseDonation = 0;
-        else BaseDonationQty.text = $"{BaseDonation = float.Parse(chunk[2].ToString()):0.00}";
+        else BaseDonationQty.text = $"{BaseDonation = float.Parse(chunk[2].ToString()):0.00}" + System.Environment.NewLine + "<i><size=60%><color=\"grey\">Base donation</size></i>";
 
         for (int i = 3, c = -1; i < chunk.Count; i++, c++)
         {
@@ -108,7 +107,7 @@ public class ItemEntry : MonoBehaviour
 
         var data = new OrderData()
         {
-            Name = Name.text,
+            Name = GlobalOrderData.ActiveItem,
             Quantity = Quantity,
             BaseDonationCost = SingleDonationCost
         };
@@ -116,7 +115,7 @@ public class ItemEntry : MonoBehaviour
 
         bool unique = true;
         OrderData ToRemove = null;
-        foreach (var entry in GlobalOrderData.InsideBasket[data.Name])
+        foreach (var entry in GlobalOrderData.ActiveBasket)
         {
             if (OldPreset?.SetEquals(entry.Details) == true)
             {
@@ -136,8 +135,8 @@ public class ItemEntry : MonoBehaviour
                 if (entry.Quantity == 0) ToRemove = entry;
             }
         }
-        if (ToRemove != null) GlobalOrderData.InsideBasket[data.Name].Remove(ToRemove);
-        if (unique) GlobalOrderData.InsideBasket[data.Name].Add(data);
+        if (ToRemove != null) GlobalOrderData.ActiveBasket.Remove(ToRemove);
+        if (unique) GlobalOrderData.ActiveBasket.Add(data);
 
         GetComponentInParent<PageManager>().GoPrevious();
     }

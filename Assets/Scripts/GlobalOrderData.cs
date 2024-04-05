@@ -83,12 +83,12 @@ public static class GlobalOrderData
         TotalRequest.InsertDataOption = SpreadsheetsResource.ValuesResource.AppendRequest.InsertDataOptionEnum.INSERTROWS;
 
         Task.WaitAll(request.ExecuteAsync(), TotalRequest.ExecuteAsync());
-
-        InsideBasket.Clear();
     }
 
     public async static Task<IList<IList<object>>> RefreshCustomers()
     {
+        //var clrreqval = new ClearValuesRequest();
+        //var DeleteRequest = _sheetsService.Spreadsheets.Values.Clear(, _spreadsheetId, TotalRange);
         var getRequest = _sheetsService.Spreadsheets.Values.Get(_spreadsheetId, "Today!B2:F");
 
         var getResponse = await getRequest.ExecuteAsync();
@@ -105,4 +105,5 @@ public static class GlobalOrderData
     }
 
     public static IList<object> ActiveItemChunk => MenuItems[ActiveItem];
+    public static List<OrderData> ActiveBasket => InsideBasket[ActiveItem];
 }

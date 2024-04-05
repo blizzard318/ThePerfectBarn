@@ -18,7 +18,7 @@ public class GenerateMenu : MonoBehaviour
 {
     [SerializeField] private GameObject CategoryPrefab, ItemEntryPrefab;
     [SerializeField] private RectTransform Scroll;
-    [SerializeField] private TextMeshProUGUI Subtitle, Basket;
+    [SerializeField] private TextMeshProUGUI Basket;
     [SerializeField] private Basket BasketMenu;
     [SerializeField] private ExistingDrinksMenu ExistingDrinksMenu;
 
@@ -36,12 +36,13 @@ public class GenerateMenu : MonoBehaviour
     {
         Refreshed = true;
 
-        for (var i = Scroll.childCount - 1; i >= 3; i--) Destroy(Scroll.GetChild(i).gameObject);
+        for (var i = Scroll.childCount - 1; i >= 2; i--) Destroy(Scroll.GetChild(i).gameObject);
 
         var values = await GlobalOrderData.RefreshSheets();
-        Subtitle.text = values[0][1].ToString();
 
         ItemEntries.Clear();
+        GlobalOrderData.MenuItems.Clear();
+        GlobalOrderData.InsideBasket.Clear();
         for (int i = 1; i < values.Count; i++) //Skip first row, that's handled above.
         {
             var row = values[i];
@@ -62,13 +63,16 @@ public class GenerateMenu : MonoBehaviour
                 item.transform.GetChild(1).GetComponent<Image>().sprite = Resources.Load<Sprite>("Images/" + row[0].ToString());
 
                 var texts = item.GetComponentsInChildren<TextMeshProUGUI>();
-                texts[0].text = row[0].ToString(); //Name
-                ItemEntries.Add(texts[0].text, item);
-                GlobalOrderData.MenuItems.Add(texts[0].text, row);
-                GlobalOrderData.InsideBasket.Add(texts[0].text, new List<OrderData>());
+                texts[0].text = $"{row[0]}"; //Name
+                if (!string.IsNullOrWhiteSpace(row[1].ToString()))
+                    texts[0].text += System.Environment.NewLine + $"<size=70%><alpha=#AA>{row[1]}</size>";
 
-                texts[1].text = string.IsNullOrWhiteSpace(row[1].ToString()) ? row[0].ToString() : row[1].ToString(); //Description
-                texts[2].text = GlobalOrderData.EVENT ? string.Empty : $"${row[2]:0.00} <size=80%>Donation</size>";
+                if (!GlobalOrderData.EVENT)
+                    texts[0].text += System.Environment.NewLine + $"<alpha=#FF><size=80%>${row[2]:0.00}</size> <alpha=#AA><size=70%>Donation</size>";
+
+                ItemEntries.Add(row[0].ToString(), item);
+                GlobalOrderData.MenuItems.Add(row[0].ToString(), row);
+                GlobalOrderData.InsideBasket.Add(row[0].ToString(), new List<OrderData>());
 
                 item.GetComponentInChildren<Button>().onClick.AddListener(() =>
                 {
@@ -87,20 +91,19 @@ public class GenerateMenu : MonoBehaviour
 
     public void OnEnable ()
     {
-        GetComponentInChildren<TMP_InputField>().text = GlobalOrderData.CustomerName;
         ColorUtility.TryParseHtmlString("#5CBD5A", out var Green);
         int BasketQuantity = 0;
         float TotalDonationCost = 0;
         foreach (var itemEntry in GlobalOrderData.InsideBasket)
         {
-            var image = ItemEntries[itemEntry.Key].transform.GetChild(5).GetComponent<Image>();
+            var image = ItemEntries[itemEntry.Key].transform.GetChild(3).GetComponent<Image>();
 
             if (itemEntry.Value.Count == 0)
             {
                 image.color = Green;
                 image.GetComponentInChildren<TextMeshProUGUI>().text = "+";
-                image.GetComponentInChildren<TextMeshProUGUI>().fontSize = 100;
-                image.GetComponentInChildren<TextMeshProUGUI>().color = UnityEngine.Color.white;
+                image.GetComponentInChildren<TextMeshProUGUI>().fontSize = 180;
+                image.GetComponentInChildren<TextMeshProUGUI>().color = Color.white;
             }
             else
             {
@@ -112,9 +115,9 @@ public class GenerateMenu : MonoBehaviour
                 }
                 BasketQuantity += TotalQuantityOfItem;
 
-                image.color = UnityEngine.Color.white;
-                image.GetComponentInChildren<TextMeshProUGUI>().fontSize = 60;
-                image.GetComponentInChildren<TextMeshProUGUI>().color = UnityEngine.Color.black;
+                image.color = Color.white;
+                image.GetComponentInChildren<TextMeshProUGUI>().fontSize = 110;
+                image.GetComponentInChildren<TextMeshProUGUI>().color = Color.black;
                 image.GetComponentInChildren<TextMeshProUGUI>().text = TotalQuantityOfItem.ToString();
             }
         }
@@ -127,8 +130,4 @@ public class GenerateMenu : MonoBehaviour
         else
             Basket.text = $"Basket ({BasketQuantity} {ItemString}): ${TotalDonationCost:0.00}";
     }
-
-    public void NameDone(string InputName) => GlobalOrderData.CustomerName = InputName;
-
-    public void OpenBasket() => GetComponentInParent<PageManager>().GoToPage(PageManager.Page.PageTitle.BASKET);
 }

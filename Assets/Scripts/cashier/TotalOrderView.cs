@@ -20,7 +20,7 @@ public sealed class Customer
 }
 public class TotalOrderView : MonoBehaviour
 {
-    [SerializeField] private GameObject CustomerPrefab, ConfirmPrompt;
+    [SerializeField] private GameObject CustomerPrefab, BlackOut;
     [SerializeField] private RectTransform Scroll;
 
     private async Task RefreshCustomers()
@@ -65,21 +65,26 @@ public class TotalOrderView : MonoBehaviour
         foreach (var customer in Customers)
         {
             var customerPanel = Instantiate(CustomerPrefab, Scroll);
-            customerPanel.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = $"Name: {customer.Name}" + System.Environment.NewLine + $"Quantity: 0/{customer.TotalDrinks}";
-            customerPanel.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = $"Cost: ${customer.TotalCost}";
-            customerPanel.transform.GetChild(3).GetComponent<Button>().onClick.AddListener(() =>
+            customerPanel.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = $"{customer.Name}" + System.Environment.NewLine + $"${customer.TotalCost}   0/{customer.TotalDrinks}";
+
+            customerPanel.transform.GetChild(1).GetComponent<Button>().onClick.AddListener(() =>
             {
-                ConfirmPrompt.SetActive(true);
-                ConfirmPrompt.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = $"Have you completed {customer.Name}'s order?";
-                ConfirmPrompt.transform.GetChild(2).GetComponent<Button>().onClick.RemoveAllListeners();
-                ConfirmPrompt.transform.GetChild(2).GetComponent<Button>().onClick.AddListener(() => Destroy(customerPanel));
+                CustomerMenu.ActiveCustomer = customer;
+                GetComponentInParent<PageManager>().GoToPage(PageManager.Page.PageTitle.INDIVIDUAL);
+            });
+
+            customerPanel.transform.GetChild(2).GetComponent<Button>().onClick.AddListener(() =>
+            {
+                var ConfirmPrompt = BlackOut.transform.GetChild(0);
+                ConfirmPrompt.GetChild(0).GetComponent<TextMeshProUGUI>().text = $"Have you completed {customer.Name}'s order?";
+                ConfirmPrompt.GetChild(1).GetComponent<Button>().onClick.RemoveAllListeners();
+                ConfirmPrompt.GetChild(1).GetComponent<Button>().onClick.AddListener(() => Destroy(customerPanel));
+                BlackOut.SetActive(true);
             });
         }
         LayoutRebuilder.ForceRebuildLayoutImmediate(Scroll);
     }
 
-    private async void OnEnable()
-    {
-        await RefreshCustomers();
-    }
+    private void OnEnable() => InvokeRepeating("RefreshCustomers", 0, 5);
+    private void OnDisable() => CancelInvoke();
 }
