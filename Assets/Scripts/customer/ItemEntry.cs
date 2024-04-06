@@ -106,9 +106,7 @@ public class ItemEntry : MonoBehaviour
             if (OldPreset == null)
                 GetComponentInParent<PageManager>().GoPrevious();
             else
-            {
-                 
-            }
+                 GlobalOrderData.ActiveBasket.RemoveAll(entry => OldPreset.SetEquals(entry.Details));
             return;
         }
 
