@@ -28,7 +28,8 @@ public class ItemEntry : MonoBehaviour
                 ColorUtility.TryParseHtmlString(Green, out Color green);
                 AddToBasketBtn.GetComponent<Image>().color = green;
                 AddToBasketBtn.GetComponent<Button>().enabled = true;
-                AddToBasketBtn.GetComponentInChildren<TextMeshProUGUI>().text = $"Back to Menu";
+                string BasketString = OldPreset == null ? "Back to Menu" : "Update Basket";
+                AddToBasketBtn.GetComponentInChildren<TextMeshProUGUI>().text = BasketString;
                 return;
             }
 
@@ -45,12 +46,13 @@ public class ItemEntry : MonoBehaviour
             ColorUtility.TryParseHtmlString(ColorCode, out Color color);
             AddToBasketBtn.GetComponent<Image>().color = color;
 
+            string BasketString = OldPreset == null ? "Add to Basket" : "Update Basket";
             if (GlobalOrderData.EVENT)
-                AddToBasketBtn.GetComponentInChildren<TextMeshProUGUI>().text = "Add to Basket";
+                AddToBasketBtn.GetComponentInChildren<TextMeshProUGUI>().text = BasketString;
             else
             {
                 var TotalDonationCost = SingleDonationCost * Quantity;
-                AddToBasketBtn.GetComponentInChildren<TextMeshProUGUI>().text = $"Add to Basket - {TotalDonationCost:0.00}";
+                AddToBasketBtn.GetComponentInChildren<TextMeshProUGUI>().text = $"{BasketString} - {TotalDonationCost:0.00}";
             }
         });
     }
@@ -99,9 +101,14 @@ public class ItemEntry : MonoBehaviour
 
     public void AddToBasket()
     {
-        if (OldPreset == null && Quantity == 0)
+        if (Quantity == 0)
         {
-            GetComponentInParent<PageManager>().GoPrevious();
+            if (OldPreset == null)
+                GetComponentInParent<PageManager>().GoPrevious();
+            else
+            {
+                 
+            }
             return;
         }
 
@@ -135,6 +142,7 @@ public class ItemEntry : MonoBehaviour
                 if (entry.Quantity == 0) ToRemove = entry;
             }
         }
+        OldPreset = null;
         if (ToRemove != null) GlobalOrderData.ActiveBasket.Remove(ToRemove);
         if (unique) GlobalOrderData.ActiveBasket.Add(data);
 
