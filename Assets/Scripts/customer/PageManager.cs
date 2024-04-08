@@ -12,7 +12,7 @@ public class PageManager : MonoBehaviour
     }
     [SerializeField] private Page.PageTitle StartingPage;
     [SerializeField] private Page[] Pages;
-    private GameObject CurrentPage, PreviousPage;
+    [SerializeField] private GameObject CurrentPage, PreviousPage;
 
     private async void Awake()
     {
@@ -30,24 +30,20 @@ public class PageManager : MonoBehaviour
 
     public void GoToPage(Page.PageTitle title)
     {
-        CurrentPage.SetActive(false);
         PreviousPage = CurrentPage;
         foreach (var page in Pages)
         {
-            if (title == page.Title)
-            {
-                (CurrentPage = page.page).SetActive(true);
-                break;
-            }
+            if (title == page.Title) (CurrentPage = page.page).SetActive(true);
+            else page.page.SetActive(false);
         }
     }
     public void GoPrevious()
     {
-        CurrentPage.SetActive(false);
-        PreviousPage.SetActive(true);
         var interim = PreviousPage;
         PreviousPage = CurrentPage;
         CurrentPage = interim;
+        PreviousPage.SetActive(false);
+        CurrentPage.SetActive(true);
     }
     public void GoToINPUT() => GoToPage(Page.PageTitle.INPUT);
     public void GoToMENU() => GoToPage(Page.PageTitle.MENU);

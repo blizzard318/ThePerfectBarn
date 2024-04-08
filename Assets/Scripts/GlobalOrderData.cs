@@ -20,6 +20,27 @@ public static class GlobalOrderData
     public static int ExistingQuantity;
     public static HashSet<string> Details;
 
+    public static int TotalQuantityOfItem { get; private set; } = 0;
+    public static float TotalDonationCost { get; private set; } = 0;
+
+    public static void EmptyBasket()
+    {
+        foreach (var entry in InsideBasket) entry.Value.Clear();
+        TotalDonationCost = TotalQuantityOfItem = 0;
+    }
+    public static void UpdateBasket ()
+    {
+        TotalDonationCost = TotalQuantityOfItem = 0;
+        foreach (var item in InsideBasket) //Different details
+        {
+            foreach (var variant in item.Value)
+            {
+                TotalQuantityOfItem += variant.Quantity;
+                TotalDonationCost += variant.Quantity * variant.BaseDonationCost;
+            }
+        }
+    }
+
     public static async Task Initialize(string json)
     {
         if (_sheetsService != null) return;
@@ -48,39 +69,41 @@ public static class GlobalOrderData
 
         return values;
     }
-    public static void PlaceOrder()
+    public static async void PlaceOrder()
     {
         const string TodayRange = "Today!A:E";
         var valueRange = new ValueRange() { Range = TodayRange, Values = new List<IList<object>>() };
 
-        bool FirstRow = true;
-        foreach (var item in InsideBasket) //Different details
+        string DateRow = DateTime.Now.ToString("f");
+        string CustomerRow = CustomerName;
+        foreach (var item in InsideBasket) //Different drinks
         {
-            for (int i = 0; i < item.Value.Count; i++)
+            string ItemRow = item.Key;
+            for (int i = 0; i < item.Value.Count; i++) //Different details
             {
                 string details = item.Value[i].JoinedDetails;
                 int quantity = item.Value[i].Quantity;
                 float _cost = quantity * item.Value[i].BaseDonationCost;
                 string cost = EVENT ? string.Empty : $"${_cost:0.00}";
 
-                if (FirstRow && i == 0)
-                {
-                    FirstRow = false;
-                    valueRange.Values.Add(new List<object> { DateTime.Now.ToString("f"), CustomerName, item.Key, details, quantity, cost });
-                }
-                else valueRange.Values.Add(new List<object> { string.Empty, string.Empty, string.Empty, details, quantity, cost });
+                if (quantity <= 0) continue;
+
+                valueRange.Values.Add(new List<object> { DateRow, CustomerRow, ItemRow, details, quantity, cost });
+                DateRow = CustomerRow = ItemRow = string.Empty;
             }
         }
 
         var request = _sheetsService.Spreadsheets.Values.Append(valueRange, _spreadsheetId, TodayRange);
         request.ValueInputOption = SpreadsheetsResource.ValuesResource.AppendRequest.ValueInputOptionEnum.USERENTERED;
         request.InsertDataOption = SpreadsheetsResource.ValuesResource.AppendRequest.InsertDataOptionEnum.INSERTROWS;
+        //await request.ExecuteAsync();
 
         const string TotalRange = "Total!A:E";
         var TotalValueRange = new ValueRange() { Range = TotalRange, Values = valueRange.Values };
         var TotalRequest = _sheetsService.Spreadsheets.Values.Append(TotalValueRange, _spreadsheetId, TotalRange);
         TotalRequest.ValueInputOption = SpreadsheetsResource.ValuesResource.AppendRequest.ValueInputOptionEnum.USERENTERED;
         TotalRequest.InsertDataOption = SpreadsheetsResource.ValuesResource.AppendRequest.InsertDataOptionEnum.INSERTROWS;
+        //await TotalRequest.ExecuteAsync();
 
         Task.WaitAll(request.ExecuteAsync(), TotalRequest.ExecuteAsync());
     }

@@ -33,7 +33,8 @@ public class TotalOrderView : MonoBehaviour
         string StoredDrinkName = string.Empty;
         foreach (var row in values)
         {
-            if (row.Count > 5) continue;
+            int Quantity = int.Parse(row[3].ToString());
+            if (Quantity <= 0) continue; //Don't render 0 drinks.
 
             string name = row[0].ToString();
             if (!string.IsNullOrWhiteSpace(name))
@@ -48,7 +49,6 @@ public class TotalOrderView : MonoBehaviour
             string drinkName = row[1].ToString();
             if (!string.IsNullOrWhiteSpace(drinkName)) StoredDrinkName = drinkName;
 
-            int Quantity = int.Parse(row[3].ToString());
             Customers[Customers.Count - 1].Drinks.Add(new Customer.DrinkDetails
             {
                 Name = drinkName,

@@ -19,7 +19,6 @@ public class GenerateMenu : MonoBehaviour
     [SerializeField] private GameObject CategoryPrefab, ItemEntryPrefab;
     [SerializeField] private RectTransform Scroll;
     [SerializeField] private TextMeshProUGUI Basket;
-    [SerializeField] private Basket BasketMenu;
     [SerializeField] private ExistingDrinksMenu ExistingDrinksMenu;
 
     public readonly Dictionary<string, GameObject> ItemEntries = new Dictionary<string, GameObject>();
@@ -92,10 +91,10 @@ public class GenerateMenu : MonoBehaviour
     public void OnEnable ()
     {
         ColorUtility.TryParseHtmlString("#5CBD5A", out var Green);
-        int BasketQuantity = 0;
-        float TotalDonationCost = 0;
+
         foreach (var itemEntry in GlobalOrderData.InsideBasket)
         {
+            itemEntry.Value.RemoveAll(data => data.Quantity <= 0);
             var image = ItemEntries[itemEntry.Key].transform.GetChild(3).GetComponent<Image>();
 
             if (itemEntry.Value.Count == 0)
@@ -107,27 +106,23 @@ public class GenerateMenu : MonoBehaviour
             }
             else
             {
-                int TotalQuantityOfItem = 0;
-                foreach (var item in itemEntry.Value) //Different details
-                {
-                    TotalQuantityOfItem += item.Quantity;
-                    TotalDonationCost += item.Quantity * item.BaseDonationCost;
-                }
-                BasketQuantity += TotalQuantityOfItem;
+                int QuantityOfItem = 0;
+                foreach (var item in itemEntry.Value) QuantityOfItem += item.Quantity;
 
                 image.color = Color.white;
                 image.GetComponentInChildren<TextMeshProUGUI>().fontSize = 110;
                 image.GetComponentInChildren<TextMeshProUGUI>().color = Color.black;
-                image.GetComponentInChildren<TextMeshProUGUI>().text = TotalQuantityOfItem.ToString();
+                image.GetComponentInChildren<TextMeshProUGUI>().text = QuantityOfItem.ToString();
             }
         }
 
+        int BasketQuantity = GlobalOrderData.TotalQuantityOfItem;
         Basket.transform.parent.gameObject.SetActive(BasketQuantity > 0);
         string ItemString = BasketQuantity == 1 ? "Item" : "Items";
 
         if (GlobalOrderData.EVENT)
             Basket.text = $"Basket ({BasketQuantity} {ItemString})";
         else
-            Basket.text = $"Basket ({BasketQuantity} {ItemString}): ${TotalDonationCost:0.00}";
+            Basket.text = $"Basket ({BasketQuantity} {ItemString}): ${GlobalOrderData.TotalDonationCost:0.00}";
     }
 }

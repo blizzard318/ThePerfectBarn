@@ -12,28 +12,24 @@ public class Basket : MonoBehaviour
 
     public void OnEnable()
     {
+        if (GlobalOrderData.TotalQuantityOfItem <= 0)
+        {
+            GetComponentInParent<PageManager>().GoToPage(PageManager.Page.PageTitle.MENU);
+            return;
+        }
+
         Scroll.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
         foreach (var order in Orders) Destroy(order.gameObject);
         Orders.Clear();
-        string ItemText = GlobalOrderData.InsideBasket.Count > 1 ? "Item" : "Items";
+        string ItemText = GlobalOrderData.TotalQuantityOfItem > 1 ? "Item" : "Items";
 
-        int TotalQuantityOfItem = 0;
-        float TotalDonationCost = 0;
-        foreach (var item in GlobalOrderData.InsideBasket) //Different details
-        {
-            foreach (var variant in item.Value)
-            {
-                TotalQuantityOfItem += variant.Quantity;
-                TotalDonationCost += variant.Quantity * variant.BaseDonationCost;
-            }
-        }
-
-        BasketQuantity.text = $"Orders ({TotalQuantityOfItem} {ItemText})";
+        BasketQuantity.text = $"Orders ({GlobalOrderData.TotalQuantityOfItem} {ItemText})";
         TotalText.enabled = BasketCost.enabled = !GlobalOrderData.EVENT;
-        BasketCost.text = $"${TotalDonationCost:0.00}";
+        BasketCost.text = $"${GlobalOrderData.TotalDonationCost:0.00}";
 
         foreach (var order in GlobalOrderData.InsideBasket)
         {
+            order.Value.RemoveAll(data => data.Quantity <= 0);
             foreach (var variant in order.Value)
             {
                 var _order = Instantiate(OrderPrefab, Scroll.transform);
@@ -41,7 +37,6 @@ public class Basket : MonoBehaviour
                 _order.GenerateOrder(variant);
             }
         }
-        gameObject.SetActive(true);
     }
     public void ConfirmOrder()
     {

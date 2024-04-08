@@ -28,31 +28,32 @@ public class ItemEntry : MonoBehaviour
                 ColorUtility.TryParseHtmlString(Green, out Color green);
                 AddToBasketBtn.GetComponent<Image>().color = green;
                 AddToBasketBtn.GetComponent<Button>().enabled = true;
-                string BasketString = OldPreset == null ? "Back to Menu" : "Update Basket";
+                string BasketString = OldPreset == null ? "Back to Menu" : "Remove Item";
                 AddToBasketBtn.GetComponentInChildren<TextMeshProUGUI>().text = BasketString;
-                return;
             }
-
-            bool AbleToOrder = true;
-            SingleDonationCost = BaseDonation;
-            foreach (var segment in Segments)
-            {
-                SingleDonationCost += segment.Values.donationCost;
-                if (!segment.Chosen) AbleToOrder = false;
-            }
-
-            var ColorCode = AbleToOrder ? Green : Grey;
-            AddToBasketBtn.GetComponent<Button>().enabled = AbleToOrder;
-            ColorUtility.TryParseHtmlString(ColorCode, out Color color);
-            AddToBasketBtn.GetComponent<Image>().color = color;
-
-            string BasketString = OldPreset == null ? "Add to Basket" : "Update Basket";
-            if (GlobalOrderData.EVENT)
-                AddToBasketBtn.GetComponentInChildren<TextMeshProUGUI>().text = BasketString;
             else
             {
-                var TotalDonationCost = SingleDonationCost * Quantity;
-                AddToBasketBtn.GetComponentInChildren<TextMeshProUGUI>().text = $"{BasketString} - {TotalDonationCost:0.00}";
+                bool AbleToOrder = true;
+                SingleDonationCost = BaseDonation;
+                foreach (var segment in Segments)
+                {
+                    SingleDonationCost += segment.Values.donationCost;
+                    if (!segment.Chosen) AbleToOrder = false;
+                }
+
+                var ColorCode = AbleToOrder ? Green : Grey;
+                AddToBasketBtn.GetComponent<Button>().enabled = AbleToOrder;
+                ColorUtility.TryParseHtmlString(ColorCode, out Color color);
+                AddToBasketBtn.GetComponent<Image>().color = color;
+
+                string BasketString = OldPreset == null ? "Add to Basket" : "Update Basket";
+                if (GlobalOrderData.EVENT)
+                    AddToBasketBtn.GetComponentInChildren<TextMeshProUGUI>().text = BasketString;
+                else
+                {
+                    var TotalDonationCost = SingleDonationCost * Quantity;
+                    AddToBasketBtn.GetComponentInChildren<TextMeshProUGUI>().text = $"{BasketString} - {TotalDonationCost:0.00}";
+                }
             }
         });
     }
@@ -103,47 +104,47 @@ public class ItemEntry : MonoBehaviour
     {
         if (Quantity == 0)
         {
-            if (OldPreset == null)
-                GetComponentInParent<PageManager>().GoPrevious();
-            else
-                 GlobalOrderData.ActiveBasket.RemoveAll(entry => OldPreset.SetEquals(entry.Details));
-            return;
+            if (OldPreset != null)
+                GlobalOrderData.ActiveBasket.RemoveAll(entry => OldPreset.SetEquals(entry.Details));
         }
-
-        var data = new OrderData()
+        else
         {
-            Name = GlobalOrderData.ActiveItem,
-            Quantity = Quantity,
-            BaseDonationCost = SingleDonationCost
-        };
-        foreach (var segment in Segments) data.Details.Add(segment.Values.name);
-
-        bool unique = true;
-        OrderData ToRemove = null;
-        foreach (var entry in GlobalOrderData.ActiveBasket)
-        {
-            if (OldPreset?.SetEquals(entry.Details) == true)
+            var data = new OrderData()
             {
-                OldPreset = null;
-                entry.Quantity = 0;
-                if (data.Quantity > 0 && entry.Details.SetEquals(data.Details))
+                Name = GlobalOrderData.ActiveItem,
+                Quantity = Quantity,
+                BaseDonationCost = SingleDonationCost
+            };
+            foreach (var segment in Segments) data.Details.Add(segment.Values.name);
+
+            bool unique = true;
+            OrderData ToRemove = null;
+            foreach (var entry in GlobalOrderData.ActiveBasket)
+            {
+                if (OldPreset?.SetEquals(entry.Details) == true)
+                {
+                    OldPreset = null;
+                    entry.Quantity = 0;
+                    if (data.Quantity > 0 && entry.Details.SetEquals(data.Details))
+                    {
+                        unique = false;
+                        entry.Quantity += data.Quantity; //Add to preset
+                    }
+                    else ToRemove = entry; //Remove old preset
+                }
+                else if (entry.Details.SetEquals(data.Details))
                 {
                     unique = false;
-                    entry.Quantity += data.Quantity; //Add to preset
+                    entry.Quantity += data.Quantity; //Add to different existing
+                    if (entry.Quantity == 0) ToRemove = entry;
                 }
-                else ToRemove = entry; //Remove old preset
             }
-            else if (entry.Details.SetEquals(data.Details))
-            {
-                unique = false;
-                entry.Quantity += data.Quantity; //Add to different existing
-                if (entry.Quantity == 0) ToRemove = entry;
-            }
+            OldPreset = null;
+            if (ToRemove != null) GlobalOrderData.ActiveBasket.Remove(ToRemove);
+            if (unique) GlobalOrderData.ActiveBasket.Add(data);
         }
-        OldPreset = null;
-        if (ToRemove != null) GlobalOrderData.ActiveBasket.Remove(ToRemove);
-        if (unique) GlobalOrderData.ActiveBasket.Add(data);
 
+        GlobalOrderData.UpdateBasket();
         GetComponentInParent<PageManager>().GoPrevious();
     }
 }
