@@ -12,7 +12,7 @@ class Segment : MonoBehaviour
     private List<Image> RadioButtons = new List<Image>();
 
     public (string name, float donationCost) Values;
-    public bool Chosen = false;
+    public bool Chosen = false; //Needed to be public
 
     public void GenerateSelection(string Chunk, HashSet<string> Preset = null)
     {
@@ -79,6 +79,7 @@ class Segment : MonoBehaviour
                     Values.donationCost = float.Parse(selection.GetChild(3).GetComponent<TextMeshProUGUI>().text);
                     GetComponentInParent<ItemEntry>(true).OnSelection.Invoke();
                 }
+                else Tick.gameObject.SetActive(Chosen);
             }
         }
     }

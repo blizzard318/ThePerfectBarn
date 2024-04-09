@@ -16,6 +16,7 @@ public class PageManager : MonoBehaviour
 
     private async void Awake()
     {
+        Application.targetFrameRate = 60;
         await GlobalOrderData.Initialize(Resources.Load<TextAsset>("credentials").text);
         foreach (var page in Pages)
         {

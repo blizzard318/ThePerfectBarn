@@ -691,6 +691,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   StartingPage: 0
   Pages: []
+  CurrentPage: {fileID: 0}
+  PreviousPage: {fileID: 0}
 --- !u!1 &1205933428
 GameObject:
   m_ObjectHideFlags: 0
@@ -815,7 +817,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 122.5
+  m_fontSize: 150
   m_fontSizeBase: 100
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -949,7 +951,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 80.6
+  m_fontSize: 130
   m_fontSizeBase: 80
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -1083,7 +1085,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 101.2
+  m_fontSize: 130
   m_fontSizeBase: 80
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -1293,7 +1295,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 89.1
+  m_fontSize: 150
   m_fontSizeBase: 90
   m_fontWeight: 400
   m_enableAutoSizing: 1
