@@ -69,7 +69,7 @@ public static class GlobalOrderData
 
         return values;
     }
-    public static async void PlaceOrder()
+    public static async Task PlaceOrder()
     {
         const string TodayRange = "Today!A:E";
         var valueRange = new ValueRange() { Range = TodayRange, Values = new List<IList<object>>() };
@@ -96,16 +96,14 @@ public static class GlobalOrderData
         var request = _sheetsService.Spreadsheets.Values.Append(valueRange, _spreadsheetId, TodayRange);
         request.ValueInputOption = SpreadsheetsResource.ValuesResource.AppendRequest.ValueInputOptionEnum.USERENTERED;
         request.InsertDataOption = SpreadsheetsResource.ValuesResource.AppendRequest.InsertDataOptionEnum.INSERTROWS;
-        //await request.ExecuteAsync();
+        await request.ExecuteAsync();
 
         const string TotalRange = "Total!A:E";
         var TotalValueRange = new ValueRange() { Range = TotalRange, Values = valueRange.Values };
         var TotalRequest = _sheetsService.Spreadsheets.Values.Append(TotalValueRange, _spreadsheetId, TotalRange);
         TotalRequest.ValueInputOption = SpreadsheetsResource.ValuesResource.AppendRequest.ValueInputOptionEnum.USERENTERED;
         TotalRequest.InsertDataOption = SpreadsheetsResource.ValuesResource.AppendRequest.InsertDataOptionEnum.INSERTROWS;
-        //await TotalRequest.ExecuteAsync();
-
-        Task.WaitAll(request.ExecuteAsync(), TotalRequest.ExecuteAsync());
+        await TotalRequest.ExecuteAsync();
     }
 
     public async static Task<IList<IList<object>>> RefreshCustomers()

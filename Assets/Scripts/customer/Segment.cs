@@ -21,7 +21,8 @@ class Segment : MonoBehaviour
         string[] Choices = split[1].Split("/");
 
         const int BaseSize = 390;
-        int AddOn = 170 * (Choices.Length - 1);
+        int height = (int)SelectionPrefab.GetComponent<RectTransform>().rect.height;
+        int AddOn = height * (Choices.Length - 1);
         int NewHeight = BaseSize + AddOn;
         GetComponent<RectTransform>().sizeDelta = new Vector2(0, NewHeight);
 
@@ -39,6 +40,7 @@ class Segment : MonoBehaviour
             selection.GetChild(3).GetComponent<TextMeshProUGUI>().text = DonationCost; //donation
 
             selection.GetChild(0).GetComponent<Button>().enabled = false;
+
             Tick.gameObject.SetActive(Chosen = true);
             selection.GetChild(1).GetComponent<Image>().sprite = Selected;
             Values.name = selection.GetChild(2).GetComponent<TextMeshProUGUI>().text;
@@ -67,17 +69,13 @@ class Segment : MonoBehaviour
                     selection.GetChild(1).GetComponent<Image>().sprite = Selected;
                     Values.name = selection.GetChild(2).GetComponent<TextMeshProUGUI>().text;
                     Values.donationCost = float.Parse(selection.GetChild(3).GetComponent<TextMeshProUGUI>().text);
-                    GetComponentInParent<ItemEntry>().OnSelection.Invoke();
+                    GetComponentInParent<ItemEntry>(true).OnSelection.Invoke();
                 });
 
                 if (Preset?.Contains(values[0]) == true)
                 {
                     Preset = null;
-                    Tick.gameObject.SetActive(Chosen = true);
-                    selection.GetChild(1).GetComponent<Image>().sprite = Selected;
-                    Values.name = selection.GetChild(2).GetComponent<TextMeshProUGUI>().text;
-                    Values.donationCost = float.Parse(selection.GetChild(3).GetComponent<TextMeshProUGUI>().text);
-                    GetComponentInParent<ItemEntry>(true).OnSelection.Invoke();
+                    selection.GetChild(0).GetComponent<Button>().onClick.Invoke();
                 }
                 else Tick.gameObject.SetActive(Chosen);
             }

@@ -38,9 +38,4 @@ public class Basket : MonoBehaviour
             }
         }
     }
-    public void ConfirmOrder()
-    {
-        GlobalOrderData.PlaceOrder();
-        GetComponentInParent<PageManager>().GoToPage(PageManager.Page.PageTitle.RECEIPT);
-    }
 }

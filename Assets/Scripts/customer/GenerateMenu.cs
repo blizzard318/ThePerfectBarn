@@ -22,6 +22,7 @@ public class GenerateMenu : MonoBehaviour
     [SerializeField] private ExistingDrinksMenu ExistingDrinksMenu;
 
     public readonly Dictionary<string, GameObject> ItemEntries = new Dictionary<string, GameObject>();
+    private Dictionary<string, List<GameObject>> Categories = new Dictionary<string, List<GameObject>>();
 
     private bool Refreshed = false;
 
@@ -35,13 +36,15 @@ public class GenerateMenu : MonoBehaviour
     {
         Refreshed = true;
 
-        for (var i = Scroll.childCount - 1; i >= 2; i--) Destroy(Scroll.GetChild(i).gameObject);
-
         var values = await GlobalOrderData.RefreshSheets();
 
+        for (var i = Scroll.childCount - 1; i >= 2; i--) Destroy(Scroll.GetChild(i).gameObject);
+
+        Categories.Clear();
         ItemEntries.Clear();
         GlobalOrderData.MenuItems.Clear();
         GlobalOrderData.InsideBasket.Clear();
+        string CurrentCategory = string.Empty;
         for (int i = 1; i < values.Count; i++) //Skip first row, that's handled above.
         {
             var row = values[i];
@@ -53,7 +56,14 @@ public class GenerateMenu : MonoBehaviour
             if (value.Contains(CategoryPrefix))
             {
                 var category = Instantiate(CategoryPrefab, Scroll);
-                category.GetComponentInChildren<TextMeshProUGUI>().text = value.Split(CategoryPrefix)[1];
+                var CatName = CurrentCategory = value.Split(CategoryPrefix)[1];
+                category.GetComponentInChildren<TextMeshProUGUI>().text = CatName;
+                Categories.TryAdd(CatName, new List<GameObject>());
+                category.GetComponent<Button>().onClick.AddListener(() =>
+                {
+                    bool Toggle = !Categories[CatName][0].activeSelf;
+                    foreach (var item in Categories[CatName]) item.gameObject.SetActive(Toggle);
+                });
             }
             else
             {
@@ -69,6 +79,7 @@ public class GenerateMenu : MonoBehaviour
                 if (!GlobalOrderData.EVENT)
                     texts[0].text += System.Environment.NewLine + $"<alpha=#FF><size=80%>${row[2]:0.00}</size> <alpha=#AA><size=70%>Donation</size>";
 
+                Categories[CurrentCategory].Add(item);
                 ItemEntries.Add(row[0].ToString(), item);
                 GlobalOrderData.MenuItems.Add(row[0].ToString(), row);
                 GlobalOrderData.InsideBasket.Add(row[0].ToString(), new List<OrderData>());
@@ -90,6 +101,9 @@ public class GenerateMenu : MonoBehaviour
 
     public void OnEnable ()
     {
+        foreach (var set in Categories)
+            foreach (var item in set.Value) item.gameObject.SetActive(true);
+
         ColorUtility.TryParseHtmlString("#5CBD5A", out var Green);
 
         foreach (var itemEntry in GlobalOrderData.InsideBasket)

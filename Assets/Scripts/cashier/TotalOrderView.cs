@@ -28,7 +28,6 @@ public class TotalOrderView : MonoBehaviour
     private async Task RefreshCustomers()
     {
         var values = await GlobalOrderData.RefreshCustomers();
-        Debug.Log(OldCount + " " + values.Count);
         if (OldCount != values.Count)
         {
             OldCount = values.Count;
@@ -101,6 +100,7 @@ public class TotalOrderView : MonoBehaviour
 
             customerPanel.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = $"{customer.Name}" + Environment.NewLine + $"${customer.TotalCost}   {CompletedDrinks}/{TotalDrinks}";
 
+            customerPanel.transform.GetChild(2).gameObject.SetActive(CompletedDrinks >= TotalDrinks);
             customerPanel.transform.GetChild(2).GetComponent<Button>().onClick.AddListener(() =>
             {
                 var ConfirmPrompt = BlackOut.transform.GetChild(0);
