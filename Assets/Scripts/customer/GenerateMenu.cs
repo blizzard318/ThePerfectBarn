@@ -57,11 +57,16 @@ public class GenerateMenu : MonoBehaviour
             {
                 var category = Instantiate(CategoryPrefab, Scroll);
                 var CatName = CurrentCategory = value.Split(CategoryPrefix)[1];
+
                 category.GetComponentInChildren<TextMeshProUGUI>().text = CatName;
                 Categories.TryAdd(CatName, new List<GameObject>());
                 category.GetComponent<Button>().onClick.AddListener(() =>
                 {
                     bool Toggle = !Categories[CatName][0].activeSelf;
+                    category.transform.GetChild(1).gameObject.SetActive(!Toggle);
+                    category.transform.GetChild(2).gameObject.SetActive(!Toggle);
+                    category.transform.GetChild(3).gameObject.SetActive(Toggle);
+                    category.transform.GetChild(4).gameObject.SetActive(Toggle);
                     foreach (var item in Categories[CatName]) item.gameObject.SetActive(Toggle);
                 });
             }

@@ -8,6 +8,7 @@ public class ItemEntry : MonoBehaviour
 {
     [SerializeField] private GameObject AddToBasketBtn, Content;
     [SerializeField] private Segment segment;
+    [SerializeField] private Image DrinkImage;
     [HideInInspector] public UnityEvent OnSelection;
     private List<Segment> Segments = new List<Segment>();
     [SerializeField] private TextMeshProUGUI Name, BaseDonationQty, QuantityText;
@@ -67,6 +68,8 @@ public class ItemEntry : MonoBehaviour
         AddOn = GlobalOrderData.ExistingQuantity == 0;
         if (AddOn) GlobalOrderData.ExistingQuantity = 1;
         QuantityText.text = (Quantity = GlobalOrderData.ExistingQuantity).ToString();
+
+        DrinkImage.sprite = Resources.Load<Sprite>("Images/" + GlobalOrderData.ActiveItem);
 
         var chunk = GlobalOrderData.ActiveItemChunk;
         Name.text = $"<b>{chunk[0]}</b>" + System.Environment.NewLine + $"<size=80%><color=\"grey\">{chunk[1]}</size>";
