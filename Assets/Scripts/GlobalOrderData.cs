@@ -71,7 +71,7 @@ public static class GlobalOrderData
     }
     public static async Task PlaceOrder()
     {
-        const string TodayRange = "Today!A:E";
+        const string TodayRange = "Today!A:Z";
         var valueRange = new ValueRange() { Range = TodayRange, Values = new List<IList<object>>() };
 
         string DateRow = DateTime.Now.ToString("f");
