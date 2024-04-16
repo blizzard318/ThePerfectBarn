@@ -13,6 +13,9 @@ public static class GlobalOrderData
 
     public static string CustomerName;
     public static bool EVENT { get; private set; } = false;
+    public static int DRINKLIMIT { get; private set; } = 20;
+    private static string MENURANGE;
+
     public static readonly Dictionary<string, IList<object>> MenuItems = new Dictionary<string, IList<object>>();
     public static readonly Dictionary<string, List<OrderData>> InsideBasket = new Dictionary<string, List<OrderData>>();
 
@@ -51,13 +54,17 @@ public static class GlobalOrderData
             ApplicationName = "perfect-barn"
         });
 
-        var getRequest = _sheetsService.Spreadsheets.Values.Get(_spreadsheetId, "Menu!A1:B");
+        var getRequest = _sheetsService.Spreadsheets.Values.Get(_spreadsheetId, "Meta!A1:B");
         var getResponse = await getRequest.ExecuteAsync();
-        EVENT = !string.IsNullOrWhiteSpace(getResponse.Values[0][0].ToString());
+        EVENT = !string.IsNullOrWhiteSpace(getResponse.Values[0][1].ToString());
+        //Day Open
+        //Time Open
+        MENURANGE = getResponse.Values[3][1].ToString();
+        DRINKLIMIT = int.Parse(getResponse.Values[4][1].ToString());
     }
     public async static Task<IList<IList<object>>> RefreshSheets()
     {
-        var getRequest = _sheetsService.Spreadsheets.Values.Get(_spreadsheetId, "Menu!A1:E");
+        var getRequest = _sheetsService.Spreadsheets.Values.Get(_spreadsheetId, MENURANGE);
 
         var getResponse = await getRequest.ExecuteAsync();
         var values = getResponse.Values;
@@ -71,7 +78,7 @@ public static class GlobalOrderData
     }
     public static async Task PlaceOrder()
     {
-        const string TodayRange = "Today!A:Z";
+        const string TodayRange = "Today!A:F";
         var valueRange = new ValueRange() { Range = TodayRange, Values = new List<IList<object>>() };
 
         string DateRow = DateTime.Now.ToString("f");
