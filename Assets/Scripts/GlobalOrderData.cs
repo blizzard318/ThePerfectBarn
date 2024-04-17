@@ -1,10 +1,11 @@
+using System;
 using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
 using System.Threading.Tasks;
 using Google.Apis.Auth.OAuth2;
 using System.Collections.Generic;
 using Google.Apis.Sheets.v4.Data;
-using System;
+using System.Linq;
 
 public static class GlobalOrderData
 {
@@ -14,7 +15,6 @@ public static class GlobalOrderData
     public static string CustomerName;
     public static bool EVENT { get; private set; } = false;
     public static int DRINKLIMIT { get; private set; } = 20;
-    private static string MENURANGE;
 
     public static readonly Dictionary<string, IList<object>> MenuItems = new Dictionary<string, IList<object>>();
     public static readonly Dictionary<string, List<OrderData>> InsideBasket = new Dictionary<string, List<OrderData>>();
@@ -53,20 +53,56 @@ public static class GlobalOrderData
             HttpClientInitializer = credential,
             ApplicationName = "perfect-barn"
         });
-
-        var getRequest = _sheetsService.Spreadsheets.Values.Get(_spreadsheetId, "Meta!A1:B");
-        var getResponse = await getRequest.ExecuteAsync();
-        EVENT = !string.IsNullOrWhiteSpace(getResponse.Values[0][1].ToString());
-        //Day Open
-        //Time Open
-        MENURANGE = getResponse.Values[3][1].ToString();
-        DRINKLIMIT = int.Parse(getResponse.Values[4][1].ToString());
     }
     public async static Task<IList<IList<object>>> RefreshSheets()
     {
-        var getRequest = _sheetsService.Spreadsheets.Values.Get(_spreadsheetId, MENURANGE);
-
+        var getRequest = _sheetsService.Spreadsheets.Values.Get(_spreadsheetId, "Meta!A1:B");
         var getResponse = await getRequest.ExecuteAsync();
+
+        if (getResponse.Values[0].Count >= 2)
+            EVENT = !string.IsNullOrWhiteSpace(getResponse.Values[0][1].ToString());
+        else EVENT = false;
+
+        var DayChunk = getResponse.Values[1][1].ToString();
+        var ValidDays = new HashSet<string>(DayChunk.Split(","));
+        if (ValidDays.Contains(DateTime.Now.DayOfWeek.ToString()))
+        {
+            //Open
+        }
+        else
+        {
+            //Closed
+        }
+
+        //Time Open
+        string[] TimeChunk = getResponse.Values[2][1].ToString().Split("-");
+        int StartingHour = int.Parse(TimeChunk[0].Substring(0, 2));
+        int ClosingHour = int.Parse(TimeChunk[1].Substring(0, 2));
+        int CurrentHour = DateTime.Now.Hour;
+        if (CurrentHour >= StartingHour && CurrentHour <= ClosingHour)
+        {
+            int CurrentMinute = DateTime.Now.Minute;
+            int StartingMinute = int.Parse(TimeChunk[0].Substring(2));
+            int ClosingMinute = int.Parse(TimeChunk[1].Substring(2));
+            if (CurrentMinute >= StartingMinute && CurrentMinute <= ClosingMinute)
+            {
+                //Open
+            }
+            else
+            {
+                //Closed
+            }
+        }
+        else
+        {
+            //Closed
+        }
+
+        string MENURANGE = getResponse.Values[3][1].ToString();
+        DRINKLIMIT = int.Parse(getResponse.Values[4][1].ToString());
+
+        getRequest = _sheetsService.Spreadsheets.Values.Get(_spreadsheetId, MENURANGE);
+        getResponse = await getRequest.ExecuteAsync();
         var values = getResponse.Values;
 
         EVENT = !string.IsNullOrWhiteSpace(values[0][0].ToString());
@@ -90,12 +126,12 @@ public static class GlobalOrderData
             {
                 string details = item.Value[i].JoinedDetails;
                 int quantity = item.Value[i].Quantity;
-                float _cost = quantity * item.Value[i].BaseDonationCost;
+                float _cost = quantity * item.Value[i].BaseDonationCost;    
                 string cost = EVENT ? string.Empty : $"${_cost:0.00}";
 
                 if (quantity <= 0) continue;
 
-                valueRange.Values.Add(new List<object> { DateRow, CustomerRow, ItemRow, details, quantity, cost });
+                valueRange.Values.Add(new List<object> { DateRow, CustomerRow, ItemRow, details, quantity, cost }); ;
                 DateRow = CustomerRow = ItemRow = string.Empty;
             }
         }

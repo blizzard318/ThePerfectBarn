@@ -93,12 +93,13 @@ public class ItemEntry : MonoBehaviour
     public void Plus()
     {
         QuantityText.text = (++Quantity).ToString();
+        if (Quantity > GlobalOrderData.DRINKLIMIT) Quantity = GlobalOrderData.DRINKLIMIT;
         OnSelection.Invoke();
     }
     public void Minus()
     {
         Quantity--;
-        if (Quantity <= 0) Quantity = 0;
+        if (Quantity < 0) Quantity = 0;
         QuantityText.text = Quantity.ToString();
         OnSelection.Invoke();
     }

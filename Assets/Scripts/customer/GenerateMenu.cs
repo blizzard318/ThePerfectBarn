@@ -45,7 +45,7 @@ public class GenerateMenu : MonoBehaviour
         GlobalOrderData.MenuItems.Clear();
         GlobalOrderData.InsideBasket.Clear();
         string CurrentCategory = string.Empty;
-        for (int i = 1; i < values.Count; i++) //Skip first row, that's handled above.
+        for (int i = 0; i < values.Count; i++)
         {
             var row = values[i];
             if (row.Count == 0) continue;
