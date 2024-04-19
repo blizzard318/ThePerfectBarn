@@ -17,9 +17,7 @@ public class ItemEntry : MonoBehaviour
     private bool AddOn = false;
     private HashSet<string> OldPreset;
 
-    private void Awake()
-    {
-        OnSelection.AddListener(() =>
+    private void Awake() => OnSelection.AddListener(() =>
         {
             const string Green = "#53AD5A", Grey = "#808080";
 
@@ -57,7 +55,6 @@ public class ItemEntry : MonoBehaviour
                 }
             }
         });
-    }
     public void OnEnable()
     {
         OldPreset = GlobalOrderData.Details;
