@@ -68,6 +68,7 @@ public class TotalOrderView : MonoBehaviour
                     Total = Quantity
                 });
 
+                if (row.Count <= 3) continue;
                 string row4 = row[4].ToString();
                 float Cost = float.Parse(row4.Substring(row4.IndexOf("$") + 1));
                 Customers[Customers.Count - 1].TotalCost += Cost;
