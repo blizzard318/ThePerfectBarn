@@ -125,7 +125,7 @@ public static class GlobalOrderData
                 string details = item.Value[i].JoinedDetails;
                 int quantity = item.Value[i].Quantity;
                 float _cost = quantity * item.Value[i].BaseDonationCost;    
-                string cost = EVENT ? string.Empty : $"${_cost:0.00}";
+                string cost = EVENT ? "$0.00" : $"${_cost:0.00}";
 
                 if (quantity <= 0) continue;
 
