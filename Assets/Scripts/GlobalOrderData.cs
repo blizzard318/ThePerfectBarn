@@ -105,8 +105,6 @@ public static class GlobalOrderData
         getResponse = await getRequest.ExecuteAsync();
         var values = getResponse.Values;
 
-        EVENT = !string.IsNullOrWhiteSpace(values[0][0].ToString());
-
         MenuItems.Clear();
         InsideBasket.Clear();
 
