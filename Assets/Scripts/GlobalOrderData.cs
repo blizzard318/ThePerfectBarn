@@ -59,9 +59,7 @@ public static class GlobalOrderData
         var getRequest = _sheetsService.Spreadsheets.Values.Get(_spreadsheetId, "Meta!A1:B");
         var getResponse = await getRequest.ExecuteAsync();
 
-        if (getResponse.Values[0].Count >= 2)
-            EVENT = !string.IsNullOrWhiteSpace(getResponse.Values[0][1].ToString());
-        else EVENT = false;
+        EVENT = getResponse.Values[0].Count >= 2;
 
         var DayChunk = getResponse.Values[1][1].ToString();
         var ValidDays = new HashSet<string>(DayChunk.Split(","));
