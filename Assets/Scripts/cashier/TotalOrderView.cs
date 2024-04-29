@@ -27,6 +27,7 @@ public class TotalOrderView : MonoBehaviour
 
     private async Task RefreshCustomers()
     {
+        bool NewCustomer = false;
         var values = await GlobalOrderData.RefreshCustomers();
         if (OldCount != values.Count)
         {
@@ -69,11 +70,14 @@ public class TotalOrderView : MonoBehaviour
                 });
 
                 if (row.Count <= 3) continue;
+                if (row[4].ToString() == "$0.00") continue;
+                NewCustomer = true;
                 string row4 = row[4].ToString();
                 float Cost = float.Parse(row4.Substring(row4.IndexOf("$") + 1));
                 Customers[Customers.Count - 1].TotalCost += Cost;
             }
         }
+        if (NewCustomer) 
 
         for (var i = 0; i < Scroll.childCount; i++) Destroy(Scroll.GetChild(i).gameObject);
         foreach (var customer in Customers)

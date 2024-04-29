@@ -36,7 +36,7 @@ class Segment : MonoBehaviour
             selection.GetChild(2).GetComponent<TextMeshProUGUI>().text = values[0];
 
             selection.GetChild(3).GetComponent<TextMeshProUGUI>().enabled = !GlobalOrderData.EVENT;
-            var DonationCost = values.Length > 1 ? values[1] : "0.00";
+            var DonationCost = values.Length > 1 ? "+" + values[1] : "0.00";
             selection.GetChild(3).GetComponent<TextMeshProUGUI>().text = DonationCost; //donation
 
             selection.GetChild(0).GetComponent<Button>().enabled = false;
@@ -59,7 +59,7 @@ class Segment : MonoBehaviour
                 selection.GetChild(2).GetComponent<TextMeshProUGUI>().text = values[0]; //name
 
                 selection.GetChild(3).GetComponent<TextMeshProUGUI>().enabled = !GlobalOrderData.EVENT;
-                var DonationCost = values.Length > 1 ? values[1] : "0.00";
+                var DonationCost = values.Length > 1 ? "+" + values[1] : "0.00";
                 selection.GetChild(3).GetComponent<TextMeshProUGUI>().text = DonationCost; //donation
 
                 selection.GetChild(0).GetComponent<Button>().onClick.AddListener(() =>

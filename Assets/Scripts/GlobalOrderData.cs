@@ -44,7 +44,7 @@ public static class GlobalOrderData
         }
     }
 
-    public static async Task Initialize(string json)
+    public static void Initialize(string json)
     {
         if (_sheetsService != null) return;
         var credential = GoogleCredential.FromJson(json).CreateScoped(new[] { SheetsService.Scope.Spreadsheets });

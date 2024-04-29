@@ -14,10 +14,10 @@ public class PageManager : MonoBehaviour
     [SerializeField] private Page[] Pages;
     [SerializeField] private GameObject CurrentPage, PreviousPage;
 
-    private async void Awake()
+    private void Awake()
     {
         Application.targetFrameRate = 60;
-        await GlobalOrderData.Initialize(Resources.Load<TextAsset>("credentials").text);
+        GlobalOrderData.Initialize(Resources.Load<TextAsset>("credentials").text);
         foreach (var page in Pages)
         {
             if (page.Title == StartingPage)
