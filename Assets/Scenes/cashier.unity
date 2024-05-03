@@ -1017,8 +1017,8 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1033366301}
   - {fileID: 2028368398}
+  - {fileID: 1033366301}
   - {fileID: 1245340674}
   m_Father: {fileID: 813957765}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1042,6 +1042,25 @@ MonoBehaviour:
   CustomerPrefab: {fileID: 4351679065933696636, guid: cfd7951c93ed9914783f61c04c5e1442, type: 3}
   BlackOut: {fileID: 1245340673}
   Scroll: {fileID: 166682918}
+  NotificationSounds:
+  - {fileID: 8300000, guid: c7421836e480fe441baa45b5cdf3853a, type: 3}
+  - {fileID: 8300000, guid: 53919b552e16b8f458198eefd4d8036b, type: 3}
+  - {fileID: 8300000, guid: b30cf2a73b003cd4fafaf6473d13087b, type: 3}
+  - {fileID: 8300000, guid: 654de2c0058b2ec41809f5f4afffa435, type: 3}
+  - {fileID: 8300000, guid: 445f4d850aa077c41b83f8b5840d8f76, type: 3}
+  - {fileID: 8300000, guid: d9990f7903e65a8488a33ce266b375bb, type: 3}
+  - {fileID: 8300000, guid: 93f1266695b42b54cba8d74e8d45fdaa, type: 3}
+  - {fileID: 8300000, guid: 4c3dc34bfda3fc544a277bd93d448970, type: 3}
+  - {fileID: 8300000, guid: e8e30be463e77334d83d88857cd23f1b, type: 3}
+  - {fileID: 8300000, guid: 1df152b1ea74c70428337d9a52708194, type: 3}
+  - {fileID: 8300000, guid: ae56378b292159b44a5774e5a90dfd01, type: 3}
+  - {fileID: 8300000, guid: 5c50f21ff32770f42a1718ab7683d744, type: 3}
+  - {fileID: 8300000, guid: 7ea73d320bdbfa847ac946e244c4ebda, type: 3}
+  - {fileID: 8300000, guid: 4ab366f5b847a3542b99f3b7fca8524c, type: 3}
+  - {fileID: 8300000, guid: be5d9ad6dc83dbc48b80f490aee177b3, type: 3}
+  - {fileID: 8300000, guid: f82b6e6bbc018b94084717232debb91b, type: 3}
+  - {fileID: 8300000, guid: a1282c71ca7b20749a3f44aaef0904a3, type: 3}
+  - {fileID: 8300000, guid: 00f11c2f398c1c74cbf1651b36a86931, type: 3}
 --- !u!82 &1000789924
 AudioSource:
   m_ObjectHideFlags: 0
@@ -1052,7 +1071,7 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 0}
+  m_audioClip: {fileID: 8300000, guid: c7421836e480fe441baa45b5cdf3853a, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1

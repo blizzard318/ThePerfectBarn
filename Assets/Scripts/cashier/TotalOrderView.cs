@@ -1,9 +1,10 @@
 using TMPro;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using System;
+
 
 [Serializable] public sealed class Customer
 {
@@ -22,6 +23,7 @@ public class TotalOrderView : MonoBehaviour
 {
     [SerializeField] private GameObject CustomerPrefab, BlackOut;
     [SerializeField] private RectTransform Scroll;
+    [SerializeField] private AudioClip[] NotificationSounds;
     private readonly List<Customer> Customers = new List<Customer>();
     private int OldCount = 0;
 
@@ -77,7 +79,11 @@ public class TotalOrderView : MonoBehaviour
                 Customers[Customers.Count - 1].TotalCost += Cost;
             }
         }
-        if (NewCustomer) 
+        if (NewCustomer)
+        {
+            int rng = UnityEngine.Random.Range(0, NotificationSounds.Length);
+            GetComponent<AudioSource>().PlayOneShot(NotificationSounds[rng]);
+        }
 
         for (var i = 0; i < Scroll.childCount; i++) Destroy(Scroll.GetChild(i).gameObject);
         foreach (var customer in Customers)
