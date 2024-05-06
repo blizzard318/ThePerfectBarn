@@ -16,6 +16,7 @@ class Segment : MonoBehaviour
 
     public void GenerateSelection(string Chunk, HashSet<string> Preset = null)
     {
+        if (string.IsNullOrWhiteSpace(Chunk)) return;
         string[] split = Chunk.Split(":");
         Name.text = split[0];
         string[] Choices = split[1].Split("/");

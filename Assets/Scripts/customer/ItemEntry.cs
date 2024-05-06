@@ -75,12 +75,14 @@ public class ItemEntry : MonoBehaviour
         if (GlobalOrderData.EVENT) BaseDonation = 0;
         else BaseDonationQty.text = $"{BaseDonation = float.Parse(chunk[2].ToString()):0.00}" + System.Environment.NewLine + "<i><size=60%><color=\"grey\">Base donation</size></i>";
 
-        for (int i = 3, c = -1; i < chunk.Count; i++, c++)
+        for (int i = 3, c = -1; i < chunk.Count; i++)
         {
+            if (string.IsNullOrWhiteSpace(chunk[i].ToString())) continue;
             var _segment = Instantiate(segment, Content.transform);
             Segments.Add(_segment);
             _segment.transform.SetSiblingIndex(_segment.transform.childCount + c);
             _segment.GenerateSelection(chunk[i].ToString(), GlobalOrderData.Details);
+            c++;
         }
         LayoutRebuilder.ForceRebuildLayoutImmediate(Content.GetComponent<RectTransform>());
         gameObject.SetActive(true);

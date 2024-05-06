@@ -17,6 +17,8 @@ public class PageManager : MonoBehaviour
     private void Awake()
     {
         Application.targetFrameRate = 60;
+        Application.runInBackground = true;
+        Screen.sleepTimeout = SleepTimeout.NeverSleep;
         GlobalOrderData.Initialize(Resources.Load<TextAsset>("credentials").text);
         foreach (var page in Pages)
         {

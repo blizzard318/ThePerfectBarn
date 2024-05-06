@@ -111,7 +111,7 @@ public class TotalOrderView : MonoBehaviour
 
             customerPanel.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = $"{customer.Name}" + Environment.NewLine + $"${customer.TotalCost}   {CompletedDrinks}/{TotalDrinks}";
 
-            customerPanel.transform.GetChild(2).gameObject.SetActive(CompletedDrinks >= TotalDrinks);
+            //customerPanel.transform.GetChild(2).gameObject.SetActive(CompletedDrinks >= TotalDrinks);
             customerPanel.transform.GetChild(2).GetComponent<Button>().onClick.AddListener(() =>
             {
                 var ConfirmPrompt = BlackOut.transform.GetChild(0);
