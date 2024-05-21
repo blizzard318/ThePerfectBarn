@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class CustomerMenu : MonoBehaviour
 {
+    private int LatestCompletedCustomer = 0;
     [SerializeField] private TextMeshProUGUI CustomerName;
     [SerializeField] private GameObject DrinkPrefab;
     [SerializeField] private RectTransform Scroll;

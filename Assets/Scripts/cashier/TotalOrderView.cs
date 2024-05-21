@@ -25,16 +25,13 @@ public class TotalOrderView : MonoBehaviour
     [SerializeField] private RectTransform Scroll;
     [SerializeField] private AudioClip[] NotificationSounds;
     private readonly List<Customer> Customers = new List<Customer>();
-    private int OldCount = 0;
 
     private async Task RefreshCustomers()
     {
         bool NewCustomer = false;
         var values = await GlobalOrderData.RefreshCustomers();
-        if (OldCount != values.Count)
+        if (values.Count > 0)
         {
-            OldCount = values.Count;
-
             string StoredDrinkName = string.Empty;
             int CustomerCounter = -1;
             bool AlreadyRecorded = false;
@@ -51,11 +48,11 @@ public class TotalOrderView : MonoBehaviour
                         AlreadyRecorded = true;
                     else
                     {
-                        AlreadyRecorded = false;
                         Customers.Add(new Customer
                         {
                             Name = name,
-                            Drinks = new List<Customer.DrinkDetails>()
+                            Drinks = new List<Customer.DrinkDetails>(),
+                            Collected = AlreadyRecorded = row.Count >= 6
                         });
                     }
                 }
@@ -71,14 +68,14 @@ public class TotalOrderView : MonoBehaviour
                     Total = Quantity
                 });
 
-                if (row.Count <= 3) continue;
-                if (row[4].ToString() == "$0.00") continue;
+                if (row.Count <= 3 || row[4].ToString() == "$0.00") continue;
                 NewCustomer = true;
                 string row4 = row[4].ToString();
                 float Cost = float.Parse(row4.Substring(row4.IndexOf("$") + 1));
                 Customers[Customers.Count - 1].TotalCost += Cost;
             }
         }
+        GlobalOrderData.LatestCustomer = Customers.Count;
         if (NewCustomer)
         {
             int rng = UnityEngine.Random.Range(0, NotificationSounds.Length);
@@ -86,8 +83,10 @@ public class TotalOrderView : MonoBehaviour
         }
 
         for (var i = 0; i < Scroll.childCount; i++) Destroy(Scroll.GetChild(i).gameObject);
+        int CustomerIndex = -1;
         foreach (var customer in Customers)
         {
+            CustomerIndex++;
             if (customer.Collected) continue;
 
             int CompletedDrinks = 0, TotalDrinks = 0;
@@ -117,10 +116,11 @@ public class TotalOrderView : MonoBehaviour
                 var ConfirmPrompt = BlackOut.transform.GetChild(0);
                 ConfirmPrompt.GetChild(0).GetComponent<TextMeshProUGUI>().text = $"Has {customer.Name} collected their order?";
                 ConfirmPrompt.GetChild(1).GetComponent<Button>().onClick.RemoveAllListeners();
-                ConfirmPrompt.GetChild(1).GetComponent<Button>().onClick.AddListener(() =>
+                ConfirmPrompt.GetChild(1).GetComponent<Button>().onClick.AddListener(async () =>
                 {
                     customer.Collected = true;
                     Destroy(customerPanel);
+                    await GlobalOrderData.CompleteCustomer(CustomerIndex);
                 });
                 BlackOut.SetActive(true);
             });
