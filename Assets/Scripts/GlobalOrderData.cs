@@ -155,9 +155,8 @@ public static class GlobalOrderData
         var getRequest = _sheetsService.Spreadsheets.Values.Get(_spreadsheetId, $"Today!B{LatestCustomer + 2}:G");
 
         var getResponse = await getRequest.ExecuteAsync();
-        var values = getResponse.Values;
 
-        return values;
+        return getResponse.Values;
     }
     public async static Task CompleteCustomer (int CompletedCustomerIndex)
     {

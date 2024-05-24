@@ -25,16 +25,16 @@ public class TotalOrderView : MonoBehaviour
     [SerializeField] private RectTransform Scroll;
     [SerializeField] private AudioClip[] NotificationSounds;
     private readonly List<Customer> Customers = new List<Customer>();
+    private int OldestIncompleteCustomerIndex = 0;
 
     private async Task RefreshCustomers()
     {
         bool NewCustomer = false;
         var values = await GlobalOrderData.RefreshCustomers();
-        if (values.Count > 0)
+        if (values?.Count > 0)
         {
             string StoredDrinkName = string.Empty;
-            int CustomerCounter = -1;
-            bool AlreadyRecorded = false;
+
             foreach (var row in values)
             {
                 int Quantity = int.Parse(row[3].ToString());
@@ -43,20 +43,18 @@ public class TotalOrderView : MonoBehaviour
                 string name = row[0].ToString();
                 if (!string.IsNullOrWhiteSpace(name))
                 {
-                    CustomerCounter++;
-                    if (Customers.Count > CustomerCounter && Customers[CustomerCounter].Name == name)
-                        AlreadyRecorded = true;
-                    else
+                    if (row.Count >= 6) //Completed
                     {
-                        Customers.Add(new Customer
-                        {
-                            Name = name,
-                            Drinks = new List<Customer.DrinkDetails>(),
-                            Collected = AlreadyRecorded = row.Count >= 6
-                        });
+
+                        Customers.Add(new Customer() { Collected = true });
+                        continue;
                     }
+                    else Customers.Add(new Customer
+                    {
+                        Name = name,
+                        Drinks = new List<Customer.DrinkDetails>()
+                    });
                 }
-                if (AlreadyRecorded) continue;
 
                 string drinkName = row[1].ToString();
                 if (!string.IsNullOrWhiteSpace(drinkName)) StoredDrinkName = drinkName;
@@ -74,8 +72,8 @@ public class TotalOrderView : MonoBehaviour
                 float Cost = float.Parse(row4.Substring(row4.IndexOf("$") + 1));
                 Customers[Customers.Count - 1].TotalCost += Cost;
             }
+            GlobalOrderData.LatestCustomer = Customers.Count;
         }
-        GlobalOrderData.LatestCustomer = Customers.Count;
         if (NewCustomer)
         {
             int rng = UnityEngine.Random.Range(0, NotificationSounds.Length);
@@ -83,11 +81,16 @@ public class TotalOrderView : MonoBehaviour
         }
 
         for (var i = 0; i < Scroll.childCount; i++) Destroy(Scroll.GetChild(i).gameObject);
-        int CustomerIndex = -1;
-        foreach (var customer in Customers)
+
+        for (int CustomerIndex = OldestIncompleteCustomerIndex; CustomerIndex < Customers.Count; CustomerIndex++)
         {
-            CustomerIndex++;
-            if (customer.Collected) continue;
+            var customer = Customers[CustomerIndex];
+
+            if (customer.Collected)
+            {
+                if (OldestIncompleteCustomerIndex + 1 == CustomerIndex) OldestIncompleteCustomerIndex++;
+                continue;
+            }
 
             int CompletedDrinks = 0, TotalDrinks = 0;
             foreach (var drink in customer.Drinks) //Variants
@@ -126,8 +129,10 @@ public class TotalOrderView : MonoBehaviour
             });
         }
         LayoutRebuilder.ForceRebuildLayoutImmediate(Scroll);
+        await Task.Delay(1000);
+        await RefreshCustomers();
     }
 
-    private void OnEnable() => InvokeRepeating("RefreshCustomers", 0, 1);
+    private async void OnEnable() => await RefreshCustomers();
     private void OnDisable() => CancelInvoke();
 }
