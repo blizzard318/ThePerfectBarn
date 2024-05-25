@@ -123,7 +123,8 @@ public class TotalOrderView : MonoBehaviour
                 {
                     customer.Collected = true;
                     Destroy(customerPanel);
-                    await GlobalOrderData.CompleteCustomer(CustomerIndex);
+                    int CompletedIndex = CustomerIndex;
+                    await GlobalOrderData.CompleteCustomer(CompletedIndex);
                 });
                 BlackOut.SetActive(true);
             });
