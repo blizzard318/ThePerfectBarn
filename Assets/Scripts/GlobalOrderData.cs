@@ -5,9 +5,6 @@ using System.Threading.Tasks;
 using Google.Apis.Auth.OAuth2;
 using System.Collections.Generic;
 using Google.Apis.Sheets.v4.Data;
-using System.Linq;
-using System.Data;
-using System.Diagnostics;
 
 public static class GlobalOrderData
 {
@@ -150,8 +147,6 @@ public static class GlobalOrderData
 
     public async static Task<IList<IList<object>>> RefreshCustomers()
     {
-        //var clrreqval = new ClearValuesRequest();
-        //var DeleteRequest = _sheetsService.Spreadsheets.Values.Clear(, _spreadsheetId, TotalRange);
         var getRequest = _sheetsService.Spreadsheets.Values.Get(_spreadsheetId, $"Today!B{LatestCustomer + 2}:G");
 
         var getResponse = await getRequest.ExecuteAsync();

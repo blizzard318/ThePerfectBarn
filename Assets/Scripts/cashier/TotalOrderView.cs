@@ -5,7 +5,6 @@ using UnityEngine.UI;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 
-
 [Serializable] public sealed class Customer
 {
     [Serializable] public sealed class DrinkDetails
@@ -45,7 +44,6 @@ public class TotalOrderView : MonoBehaviour
                 {
                     if (row.Count >= 6) //Completed
                     {
-
                         Customers.Add(new Customer() { Collected = true });
                         continue;
                     }
@@ -111,8 +109,10 @@ public class TotalOrderView : MonoBehaviour
                 GetComponentInParent<PageManager>().GoToPage(PageManager.Page.PageTitle.INDIVIDUAL);
             });
 
-            customerPanel.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = $"{customer.Name}" + Environment.NewLine + $"${customer.TotalCost}   {CompletedDrinks}/{TotalDrinks}";
+            var DisplayedName = $"{CustomerIndex + 1}. {customer.Name}" + Environment.NewLine;
+            customerPanel.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = DisplayedName + $"${customer.TotalCost}   {CompletedDrinks}/{TotalDrinks}";
 
+            int CompletedIndex = CustomerIndex;
             //customerPanel.transform.GetChild(2).gameObject.SetActive(CompletedDrinks >= TotalDrinks);
             customerPanel.transform.GetChild(2).GetComponent<Button>().onClick.AddListener(() =>
             {
@@ -123,7 +123,6 @@ public class TotalOrderView : MonoBehaviour
                 {
                     customer.Collected = true;
                     Destroy(customerPanel);
-                    int CompletedIndex = CustomerIndex;
                     await GlobalOrderData.CompleteCustomer(CompletedIndex);
                 });
                 BlackOut.SetActive(true);
