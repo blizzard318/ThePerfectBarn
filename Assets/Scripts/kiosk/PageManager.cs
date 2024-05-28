@@ -6,7 +6,7 @@ public class PageManager : MonoBehaviour
 {
     [Serializable] public class Page
     {
-        public enum PageTitle { INPUT, MENU, ITEM, BASKET, RECEIPT, CUSTOMERS, INDIVIDUAL };
+        public enum PageTitle { INPUT, MENU, ITEM, BASKET, RECEIPT, CUSTOMERS, INDIVIDUAL, RETURN, NONE };
         public PageTitle Title;
         public GameObject page;
     }
@@ -55,7 +55,9 @@ public class PageManager : MonoBehaviour
     public void GoToRECEIPT() => GoToPage(Page.PageTitle.RECEIPT);
     public void GoToCUSTOMERS() => GoToPage(Page.PageTitle.CUSTOMERS);
     public void GoToINDIVIDUAL() => GoToPage(Page.PageTitle.INDIVIDUAL);
+    public void GoToRETURN() => GoToPage(Page.PageTitle.RETURN);
 
-    public void LoadCustomer() => SceneManager.LoadScene("Customer");
+    public void LoadKiosk() => SceneManager.LoadScene("Kiosk");
     public void LoadCashier() => SceneManager.LoadScene("Cashier");
+    public void LoadScreen() => SceneManager.LoadScene("Screen");
 }

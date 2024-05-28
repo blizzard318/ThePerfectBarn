@@ -23,17 +23,12 @@ public class TotalCustomerView : MonoBehaviour
                 for (int i = LastRecordedCustomer; i < values.Count; i++)
                 {
                     var row = values[i];
-                    int Quantity = int.Parse(row[3].ToString());
-                    if (Quantity <= 0) continue; //Don't render 0 drinks.
 
                     string name = row[0].ToString();
                     if (!string.IsNullOrWhiteSpace(name))
                     {
-                        string customerString = $"{i + 1}. {name}";
-                        if (row.Count >= 6) //Completed
-                            CompleteCustomers.Add(customerString);
-                        else
-                            PrepareCustomers.Add(customerString);
+                        if (row.Count >= 6) CompleteCustomers.Add(name); //Completed
+                        else PrepareCustomers.Add(name);
                     }
                 }
                 LastRecordedCustomer = values.Count;
@@ -41,22 +36,22 @@ public class TotalCustomerView : MonoBehaviour
             for (int i = GlobalOrderData.LatestCustomer; i < values.Count; i++)
             {
                 var row = values[i];
-                if (row.Count >= 6) //Completed
+                string name = row[0].ToString();
+                if (!string.IsNullOrWhiteSpace(name) && row.Count >= 6) //Completed
                 {
-                    string customerString = $"{i + 1}. {name}";
-                    if (PrepareCustomers.Remove(customerString)) CompleteCustomers.Add(customerString);
+                    if (PrepareCustomers.Remove(name)) CompleteCustomers.Add(name);
                     if (GlobalOrderData.LatestCustomer + 1 == i) GlobalOrderData.LatestCustomer++;
                 }
             }
         }
 
         for (var i = 0; i < CompleteScroll.childCount; i++) Destroy(CompleteScroll.GetChild(i).gameObject);
-        for (int CustomerIndex = CompleteCustomers.Count - 1; CustomerIndex > 0; CustomerIndex--)
+        for (int CustomerIndex = CompleteCustomers.Count - 1; CustomerIndex >= 0; CustomerIndex--)
             Instantiate(CustomerPrefab, CompleteScroll).GetComponent<TextMeshProUGUI>().text = CompleteCustomers[CustomerIndex];
         LayoutRebuilder.ForceRebuildLayoutImmediate(CompleteScroll);
 
         for (var i = 0; i < PrepareScroll.childCount; i++) Destroy(PrepareScroll.GetChild(i).gameObject);
-        for (int CustomerIndex = PrepareCustomers.Count - 1; CustomerIndex > 0; CustomerIndex--)
+        for (int CustomerIndex = 0; CustomerIndex < PrepareCustomers.Count; CustomerIndex++)
             Instantiate(CustomerPrefab, PrepareScroll).GetComponent<TextMeshProUGUI>().text = PrepareCustomers[CustomerIndex];
         LayoutRebuilder.ForceRebuildLayoutImmediate(PrepareScroll);
 
@@ -65,5 +60,4 @@ public class TotalCustomerView : MonoBehaviour
     }
 
     private async void OnEnable() => await RefreshCustomers();
-    private void OnDisable() => CancelInvoke();
 }

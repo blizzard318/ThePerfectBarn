@@ -12,4 +12,5 @@ public class NameInput : MonoBehaviour
     }
     private void OnDisable() => GlobalOrderData.CustomerName = GetComponentInChildren<TMP_InputField>().text;
     public void OnNameInput(string name) => ProceedToMenu.SetActive(!string.IsNullOrWhiteSpace(name));
+    public void SaveName() => PlayerPrefs.SetString("CustomerName", GetComponentInChildren<TMP_InputField>().text);
 }

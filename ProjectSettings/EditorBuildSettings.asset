@@ -12,6 +12,12 @@ EditorBuildSettings:
     path: Assets/Scenes/cashier.unity
     guid: e8038882c4e25e84c9c742102a304ca9
   - enabled: 1
-    path: Assets/Scenes/customer.unity
+    path: Assets/Scenes/kiosk.unity
     guid: 2cda990e2423bbf4892e6590ba056729
+  - enabled: 1
+    path: Assets/Scenes/screen.unity
+    guid: 72db97c6ef5447745811fb4b50929fe8
+  - enabled: 1
+    path: Assets/Scenes/customer.unity
+    guid: 741b61e9d447f894f82ab89d05d16e02
   m_configObjects: {}
