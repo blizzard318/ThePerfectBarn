@@ -14,6 +14,7 @@ public class CustomerStart : MonoBehaviour
         args.AndroidChannelName = "Notifications";
         args.AndroidChannelDescription = "Main notifications";
         NotificationCenter.Initialize(args);
+        NotificationCenter.OnNotificationReceived += _ => Handheld.Vibrate();
     }
 
     private IEnumerator Start()

@@ -1,15 +1,19 @@
 using System;
+using System.Text;
 using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
 using System.Threading.Tasks;
 using Google.Apis.Auth.OAuth2;
 using System.Collections.Generic;
 using Google.Apis.Sheets.v4.Data;
+using System.Diagnostics;
 
 public static class GlobalOrderData
 {
     private static SheetsService _sheetsService;
     private const string _spreadsheetId = "1BO_oYW57E_xQZqt2UcAIrpRa6s5ZgK_nh4UD8Q5coZQ";
+
+    public const string NotificationGroup = "The Perfect Barn";
 
     public static string CustomerName;
     public static bool EVENT { get; private set; } = false;
@@ -108,7 +112,7 @@ public static class GlobalOrderData
 
         return values;
     }
-    public async static Task PlaceOrder()
+    public async static Task<string> PlaceOrder()
     {
         const string TodayRange = "Today!A:F";
         var valueRange = new ValueRange() { Range = TodayRange, Values = new List<IList<object>>() };
@@ -135,7 +139,7 @@ public static class GlobalOrderData
         var request = _sheetsService.Spreadsheets.Values.Append(valueRange, _spreadsheetId, TodayRange);
         request.ValueInputOption = SpreadsheetsResource.ValuesResource.AppendRequest.ValueInputOptionEnum.USERENTERED;
         request.InsertDataOption = SpreadsheetsResource.ValuesResource.AppendRequest.InsertDataOptionEnum.INSERTROWS;
-        await request.ExecuteAsync();
+        var response = await request.ExecuteAsync();
 
         const string TotalRange = "Total!A:E";
         var TotalValueRange = new ValueRange() { Range = TotalRange, Values = valueRange.Values };
@@ -143,14 +147,22 @@ public static class GlobalOrderData
         TotalRequest.ValueInputOption = SpreadsheetsResource.ValuesResource.AppendRequest.ValueInputOptionEnum.USERENTERED;
         TotalRequest.InsertDataOption = SpreadsheetsResource.ValuesResource.AppendRequest.InsertDataOptionEnum.INSERTROWS;
         await TotalRequest.ExecuteAsync();
+
+        var sb = new StringBuilder(response.Updates.UpdatedRange.Split(":")[1]);
+        sb[0] = 'G';
+        return sb.ToString(); //Returns cell to look out for.
+    }
+    public async static Task<bool> IsOrderDone(string cell)
+    {
+        var getRequest = _sheetsService.Spreadsheets.Values.Get(_spreadsheetId, $"Today!{cell}");
+        var getResponse = await getRequest.ExecuteAsync();
+        return getResponse.Values?.Count > 0 && !string.IsNullOrEmpty(getResponse.Values[0][0].ToString());
     }
 
     public async static Task<IList<IList<object>>> RefreshCustomers()
     {
         var getRequest = _sheetsService.Spreadsheets.Values.Get(_spreadsheetId, $"Today!B{LatestCustomer + 2}:G");
-
         var getResponse = await getRequest.ExecuteAsync();
-
         return getResponse.Values;
     }
     public async static Task CompleteCustomer (int CompletedCustomerIndex)

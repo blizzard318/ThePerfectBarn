@@ -36,7 +36,6 @@ public class TotalOrderView : MonoBehaviour
 
             foreach (var row in values)
             {
-
                 string name = row[0].ToString();
                 if (!string.IsNullOrWhiteSpace(name))
                 {
