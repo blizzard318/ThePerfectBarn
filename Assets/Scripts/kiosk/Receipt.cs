@@ -25,6 +25,7 @@ public class Receipt : MonoBehaviour
         NextOrder.SetActive(true);
         if (EnableNotification) await Task.Run(async () =>
         {
+            GlobalOrderData.EmptyBasket();
             while (!await GlobalOrderData.IsOrderDone(cell)) await Task.Delay(1000);
             var notif = new Notification()
             {
@@ -35,8 +36,15 @@ public class Receipt : MonoBehaviour
                 Text = $"God bless you, {GlobalOrderData.CustomerName}" + Environment.NewLine + "Please proceed to Level 3 to collect your drink.",
             };
             var time = new NotificationDateTimeSchedule(DateTime.Now);
-            NotificationCenter.ScheduleNotification(notif, GlobalOrderData.NotificationGroup, time);
-            Debug.Log(notif.Title);
+            try
+            {
+                NotificationCenter.ScheduleNotification(notif, GlobalOrderData.NotificationGroup, time);
+            }
+            catch (Exception ex)
+            {
+                Debug.Log(ex);
+            }
+            Debug.Log("Test3");
         });
 
         IEnumerator LoadingText()
