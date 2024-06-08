@@ -68,10 +68,9 @@ public class TotalOrderView : MonoBehaviour
                 float Cost = float.Parse(row4.Substring(row4.IndexOf("$") + 1));
                 Customers[Customers.Count - 1].TotalCost += Cost;
             }
-            GlobalOrderData.LatestCustomer = Customers.Count;
+            GlobalOrderData.LatestCustomer += values.Count; //-1?
         }
-        if (NewCustomer)
-            GetComponent<AudioSource>().PlayOneShot(NotificationSound);
+        if (NewCustomer) GetComponent<AudioSource>().PlayOneShot(NotificationSound);
 
         for (var i = 0; i < Scroll.childCount; i++) Destroy(Scroll.GetChild(i).gameObject);
 
