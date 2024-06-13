@@ -226,7 +226,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: -0.00048828125}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: -1728}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &166682919
 MonoBehaviour:
@@ -646,7 +646,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 1, g: 1, b: 1, a: 1}
+  m_BackGroundColor: {r: 0.9333334, g: 0.8470589, b: 0.7019608, a: 1}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -1005,7 +1005,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1000789922
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1043,8 +1043,7 @@ MonoBehaviour:
   CustomerPrefab: {fileID: 4351679065933696636, guid: cfd7951c93ed9914783f61c04c5e1442, type: 3}
   BlackOut: {fileID: 1245340673}
   Scroll: {fileID: 166682918}
-  NotificationSounds:
-  - {fileID: 8300000, guid: c7421836e480fe441baa45b5cdf3853a, type: 3}
+  NotificationSound: {fileID: 0}
 --- !u!82 &1000789924
 AudioSource:
   m_ObjectHideFlags: 0
@@ -1942,7 +1941,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.29803923}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.101960786}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 0
