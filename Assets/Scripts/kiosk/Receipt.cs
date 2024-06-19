@@ -44,7 +44,6 @@ public class Receipt : MonoBehaviour
             {
                 Debug.Log(ex);
             }
-            Debug.Log("Test3");
         });
 
         IEnumerator LoadingText()
