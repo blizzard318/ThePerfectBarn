@@ -66,7 +66,7 @@ public class ItemEntry : MonoBehaviour
         if (AddOn) GlobalOrderData.ExistingQuantity = 1;
         QuantityText.text = (Quantity = GlobalOrderData.ExistingQuantity).ToString();
 
-        DrinkImage.sprite = Resources.Load<Sprite>("Images/" + GlobalOrderData.ActiveItem);
+        DrinkImage.sprite = Resources.Load<Sprite>("Images/" + GlobalOrderData.ActiveItem) ?? Resources.Load<Sprite>("Images/Default");
 
         var chunk = GlobalOrderData.ActiveItemChunk;
         Name.text = $"<b>{chunk[0]}</b>" + System.Environment.NewLine + $"<size=80%><color=\"grey\">{chunk[1]}</size>";

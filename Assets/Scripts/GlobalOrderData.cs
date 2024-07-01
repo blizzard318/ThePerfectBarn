@@ -53,10 +53,7 @@ public static class GlobalOrderData
         if (_sheetsService != null) return;
         var credential = GoogleCredential.FromJson(json).CreateScoped(new[] { SheetsService.Scope.Spreadsheets });
         _sheetsService = new SheetsService(new BaseClientService.Initializer()
-        {
-            HttpClientInitializer = credential,
-            ApplicationName = "perfect-barn"
-        });
+        { HttpClientInitializer = credential, ApplicationName = "perfect-barn" });
     }
     public async static Task<IList<IList<object>>> RefreshSheets()
     {

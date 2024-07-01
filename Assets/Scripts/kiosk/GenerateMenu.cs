@@ -74,7 +74,7 @@ public class GenerateMenu : MonoBehaviour
             {
                 var item = Instantiate(ItemEntryPrefab, Scroll);
 
-                item.transform.GetChild(1).GetComponent<Image>().sprite = Resources.Load<Sprite>("Images/" + row[0].ToString());
+                item.transform.GetChild(1).GetComponent<Image>().sprite = Resources.Load<Sprite>("Images/" + row[0].ToString()) ?? Resources.Load<Sprite>("Images/Default");
 
                 var texts = item.GetComponentsInChildren<TextMeshProUGUI>();
                 texts[0].text = $"{row[0]}"; //Name
