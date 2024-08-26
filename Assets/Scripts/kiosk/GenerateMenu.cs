@@ -51,6 +51,7 @@ public class GenerateMenu : MonoBehaviour
             if (row.Count == 0) continue;
 
             var value = row[0].ToString();
+            if (value[0] == '!') continue;
 
             const string CategoryPrefix = "Category:";
             if (value.Contains(CategoryPrefix))
