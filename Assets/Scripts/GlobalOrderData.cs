@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Google.Apis.Auth.OAuth2;
 using System.Collections.Generic;
 using Google.Apis.Sheets.v4.Data;
-using System.Diagnostics;
 
 public static class GlobalOrderData
 {
@@ -18,6 +17,7 @@ public static class GlobalOrderData
     public static string CustomerName;
     public static bool EVENT { get; private set; } = false;
     public static int DRINKLIMIT { get; private set; } = 20;
+    public static string IMAGEREPO { get; private set; }
 
     public static readonly Dictionary<string, IList<object>> MenuItems = new Dictionary<string, IList<object>>();
     public static readonly Dictionary<string, List<OrderData>> InsideBasket = new Dictionary<string, List<OrderData>>();
@@ -99,6 +99,7 @@ public static class GlobalOrderData
 
         string MENURANGE = getResponse.Values[3][1].ToString();
         DRINKLIMIT = int.Parse(getResponse.Values[4][1].ToString());
+        IMAGEREPO = getResponse.Values[5][1].ToString();
 
         getRequest = _sheetsService.Spreadsheets.Values.Get(_spreadsheetId, MENURANGE);
         getResponse = await getRequest.ExecuteAsync();
@@ -182,4 +183,24 @@ public static class GlobalOrderData
 
     public static IList<object> ActiveItemChunk => MenuItems[ActiveItem];
     public static List<OrderData> ActiveBasket => InsideBasket[ActiveItem];
+
+    /*public static void LoadImage (UnityEngine.UI.Image image, string TextureName)
+    {
+        var www = UnityWebRequestTexture.GetTexture($"{IMAGEREPO}{TextureName}.png");
+        www.SendWebRequest
+        yield return www.SendWebRequest();
+
+        if (www.result != UnityWebRequest.Result.Success)
+        {
+            if (suffix == ".png") StartCoroutine(GetTexture(TextureName, ".jpg"));
+            else item.transform.GetChild(1).GetComponent<Image>().sprite = Resources.Load<Sprite>("Images/Default");
+            //item.transform.GetChild(1).GetComponent<RawImage>().texture = Resources.Load<Texture2D>("Images/Default");
+        }
+        else
+        {
+            var tex = DownloadHandlerTexture.GetContent(www);
+            //item.transform.GetChild(1).GetComponent<RawImage>().texture = tex;
+            item.transform.GetChild(1).GetComponent<Image>().sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), Vector2.zero);
+        }
+    }*/
 }

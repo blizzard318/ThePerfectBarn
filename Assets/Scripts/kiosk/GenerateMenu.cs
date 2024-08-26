@@ -1,8 +1,10 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Networking;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Collections;
 
 public sealed class OrderData //Variant
 {
@@ -75,7 +77,27 @@ public class GenerateMenu : MonoBehaviour
             {
                 var item = Instantiate(ItemEntryPrefab, Scroll);
 
-                item.transform.GetChild(1).GetComponent<Image>().sprite = Resources.Load<Sprite>("Images/" + row[0].ToString()) ?? Resources.Load<Sprite>("Images/Default");
+                //item.transform.GetChild(1).GetComponent<Image>().sprite = Resources.Load<Sprite>("Images/" + row[0].ToString()) ?? Resources.Load<Sprite>("Images/Default");
+
+                StartCoroutine(GetTexture(row[0].ToString()));
+                IEnumerator GetTexture(string texturePath, string suffix = ".png")
+                {
+                    var www = UnityWebRequestTexture.GetTexture($"{GlobalOrderData.IMAGEREPO}{texturePath}{suffix}");
+                    yield return www.SendWebRequest();
+
+                    if (www.result != UnityWebRequest.Result.Success)
+                    {
+                        if (suffix == ".png") StartCoroutine(GetTexture(texturePath, ".jpg"));
+                        else item.transform.GetChild(1).GetComponent<Image>().sprite = Resources.Load<Sprite>("Images/Default");
+                        //item.transform.GetChild(1).GetComponent<RawImage>().texture = Resources.Load<Texture2D>("Images/Default");
+                    }
+                    else
+                    {
+                        var tex = DownloadHandlerTexture.GetContent(www);
+                        //item.transform.GetChild(1).GetComponent<RawImage>().texture = tex;
+                        item.transform.GetChild(1).GetComponent<Image>().sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), Vector2.zero);
+                    }
+                }
 
                 var texts = item.GetComponentsInChildren<TextMeshProUGUI>();
                 texts[0].text = $"{row[0]}"; //Name

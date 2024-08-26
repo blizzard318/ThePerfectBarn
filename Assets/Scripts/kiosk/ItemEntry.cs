@@ -3,6 +3,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Events;
 using System.Collections.Generic;
+using System.Collections;
+using UnityEngine.Networking;
 
 public class ItemEntry : MonoBehaviour
 {
@@ -66,7 +68,27 @@ public class ItemEntry : MonoBehaviour
         if (AddOn) GlobalOrderData.ExistingQuantity = 1;
         QuantityText.text = (Quantity = GlobalOrderData.ExistingQuantity).ToString();
 
-        DrinkImage.sprite = Resources.Load<Sprite>("Images/" + GlobalOrderData.ActiveItem) ?? Resources.Load<Sprite>("Images/Default");
+        //DrinkImage.sprite = Resources.Load<Sprite>("Images/" + GlobalOrderData.ActiveItem) ?? Resources.Load<Sprite>("Images/Default");
+
+        StartCoroutine(GetTexture(GlobalOrderData.ActiveItem));
+        IEnumerator GetTexture(string texturePath, string suffix = ".png")
+        {
+            var www = UnityWebRequestTexture.GetTexture($"{GlobalOrderData.IMAGEREPO}{texturePath}.png");
+            yield return www.SendWebRequest();
+
+            if (www.result != UnityWebRequest.Result.Success)
+            {
+                if (suffix == ".png") StartCoroutine(GetTexture(texturePath, ".jpg"));
+                else DrinkImage.sprite = Resources.Load<Sprite>("Images/Default");
+                //DrinkImage.texture = Resources.Load<Texture2D>("Images/Default");
+            }
+            else
+            {
+                var tex = DownloadHandlerTexture.GetContent(www);
+                DrinkImage.sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), Vector2.zero);
+                //DrinkImage.texture = tex;
+            }
+        }
 
         var chunk = GlobalOrderData.ActiveItemChunk;
         Name.text = $"<b>{chunk[0]}</b>" + System.Environment.NewLine + $"<size=80%><color=\"grey\">{chunk[1]}</size>";
