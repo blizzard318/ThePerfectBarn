@@ -27,15 +27,14 @@ public class Basket : MonoBehaviour
         TotalText.enabled = BasketCost.enabled = !GlobalOrderData.EVENT;
         BasketCost.text = $"${GlobalOrderData.TotalDonationCost:0.00}";
 
-        foreach (var order in GlobalOrderData.InsideBasket)
+        GlobalOrderData.ForEachBasket(order =>
         {
-            order.Value.RemoveAll(data => data.Quantity <= 0);
             foreach (var variant in order.Value)
             {
                 var _order = Instantiate(OrderPrefab, Scroll.transform);
                 Orders.Add(_order);
                 _order.GenerateOrder(variant);
             }
-        }
+        });
     }
 }

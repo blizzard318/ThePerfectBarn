@@ -74,10 +74,7 @@ class Segment : MonoBehaviour
                 });
 
                 if (Preset?.Contains(values[0]) == true)
-                {
-                    Preset = null;
                     selection.GetChild(0).GetComponent<Button>().onClick.Invoke();
-                }
                 else Tick.gameObject.SetActive(Chosen);
             }
         }

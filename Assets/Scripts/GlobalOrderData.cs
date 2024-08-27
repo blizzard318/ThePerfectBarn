@@ -1,7 +1,11 @@
 using System;
 using System.Text;
+using UnityEngine;
+using UnityEngine.UI;
+using System.Collections;
 using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
+using UnityEngine.Networking;
 using System.Threading.Tasks;
 using Google.Apis.Auth.OAuth2;
 using System.Collections.Generic;
@@ -17,18 +21,35 @@ public static class GlobalOrderData
     public static string CustomerName;
     public static bool EVENT { get; private set; } = false;
     public static int DRINKLIMIT { get; private set; } = 20;
-    public static string IMAGEREPO { get; private set; }
+    public static string IMAGEREPO { get; private set; } = "https://blizzard318.github.io/ThePerfectBarn/";
 
-    public static readonly Dictionary<string, IList<object>> MenuItems = new Dictionary<string, IList<object>>();
-    public static readonly Dictionary<string, List<OrderData>> InsideBasket = new Dictionary<string, List<OrderData>>();
+    private static readonly Dictionary<string, IList<object>> MenuItems = new Dictionary<string, IList<object>>();
+    private static readonly Dictionary<string, List<OrderData>> InsideBasket = new Dictionary<string, List<OrderData>>();
+    private static readonly Dictionary<string, Sprite> ImageRepo = new Dictionary<string, Sprite>();
+
+    public static void ForEachBasket (Action<KeyValuePair<string, List<OrderData>>> action)
+    {
+        foreach (var order in InsideBasket)
+        {
+            order.Value.RemoveAll(data => data.Quantity <= 0); //Safety remove
+            action(order);
+        }
+    }
 
     public static int LatestCustomer = 0;
     public static string ActiveItem;
     public static int ExistingQuantity;
     public static HashSet<string> Details;
 
+
     public static int TotalQuantityOfItem { get; private set; } = 0;
     public static float TotalDonationCost { get; private set; } = 0;
+
+    public static void AddMenuItem(IList<object> row)
+    {
+        MenuItems.Add(row[0].ToString(), row);
+        InsideBasket.Add(row[0].ToString(), new List<OrderData>());
+    }
 
     public static void EmptyBasket()
     {
@@ -43,7 +64,7 @@ public static class GlobalOrderData
             foreach (var variant in item.Value)
             {
                 TotalQuantityOfItem += variant.Quantity;
-                TotalDonationCost += variant.Quantity * variant.BaseDonationCost;
+                TotalDonationCost += variant.Quantity * variant.DonationCost;
             }
         }
     }
@@ -124,7 +145,7 @@ public static class GlobalOrderData
             {
                 string details = item.Value[i].JoinedDetails;
                 int quantity = item.Value[i].Quantity;
-                float _cost = quantity * item.Value[i].BaseDonationCost;    
+                float _cost = quantity * item.Value[i].DonationCost;    
                 string cost = EVENT ? "$0.00" : $"${_cost:0.00}";
 
                 if (quantity <= 0) continue;
@@ -183,24 +204,34 @@ public static class GlobalOrderData
 
     public static IList<object> ActiveItemChunk => MenuItems[ActiveItem];
     public static List<OrderData> ActiveBasket => InsideBasket[ActiveItem];
-
-    /*public static void LoadImage (UnityEngine.UI.Image image, string TextureName)
+    public static IEnumerator GetTexture(this Image image, string texturePath)
     {
-        var www = UnityWebRequestTexture.GetTexture($"{IMAGEREPO}{TextureName}.png");
-        www.SendWebRequest
-        yield return www.SendWebRequest();
+        Sprite ToLoad = null;
+        if (!ImageRepo.TryGetValue(texturePath, out ToLoad))
+        {
+            image.enabled = false;
+            var www = UnityWebRequestTexture.GetTexture($"{IMAGEREPO}{texturePath}.png");
+            yield return www.SendWebRequest();
 
-        if (www.result != UnityWebRequest.Result.Success)
-        {
-            if (suffix == ".png") StartCoroutine(GetTexture(TextureName, ".jpg"));
-            else item.transform.GetChild(1).GetComponent<Image>().sprite = Resources.Load<Sprite>("Images/Default");
-            //item.transform.GetChild(1).GetComponent<RawImage>().texture = Resources.Load<Texture2D>("Images/Default");
+            if (www.result != UnityWebRequest.Result.Success)
+            {
+                www = UnityWebRequestTexture.GetTexture($"{IMAGEREPO}{texturePath}.jpg");
+                yield return www.SendWebRequest();
+
+                if (www.result != UnityWebRequest.Result.Success)
+                {
+                    ToLoad = Resources.Load<Sprite>("Images/Default");
+                    //ToLoad = Resources.Load<Texture2D>("Images/Default");
+                }
+            }
+            if (ToLoad == null)
+            {
+                var tex = DownloadHandlerTexture.GetContent(www); //ToLoad = tex;
+                ToLoad = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), Vector2.zero);
+            }
+            ImageRepo.TryAdd(texturePath, ToLoad);
+            image.enabled = true;
         }
-        else
-        {
-            var tex = DownloadHandlerTexture.GetContent(www);
-            //item.transform.GetChild(1).GetComponent<RawImage>().texture = tex;
-            item.transform.GetChild(1).GetComponent<Image>().sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), Vector2.zero);
-        }
-    }*/
+        image.sprite = ToLoad;
+    }
 }

@@ -3,8 +3,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Events;
 using System.Collections.Generic;
-using System.Collections;
-using UnityEngine.Networking;
 
 public class ItemEntry : MonoBehaviour
 {
@@ -20,43 +18,40 @@ public class ItemEntry : MonoBehaviour
     private HashSet<string> OldPreset;
 
     private void Awake() => OnSelection.AddListener(() =>
+    {
+        const string Green = "#53AD5A", Grey = "#808080";
+        string ColorCode;
+        bool AbleToOrder = true;
+
+        if (Quantity <= 0)
         {
-            const string Green = "#53AD5A", Grey = "#808080";
-
-            if (Quantity <= 0)
+            Quantity = 0;
+            ColorCode = Green;
+            string BasketString = OldPreset == null ? "Back to Menu" : "Remove Item";
+            AddToBasketBtn.GetComponentInChildren<TextMeshProUGUI>().text = BasketString;
+        }
+        else
+        {
+            SingleDonationCost = BaseDonation;
+            foreach (var segment in Segments)
             {
-                Quantity = 0;
-                ColorUtility.TryParseHtmlString(Green, out Color green);
-                AddToBasketBtn.GetComponent<Image>().color = green;
-                AddToBasketBtn.GetComponent<Button>().enabled = true;
-                string BasketString = OldPreset == null ? "Back to Menu" : "Remove Item";
-                AddToBasketBtn.GetComponentInChildren<TextMeshProUGUI>().text = BasketString;
+                SingleDonationCost += segment.Values.donationCost;
+                if (!segment.Chosen) AbleToOrder = false;
             }
-            else
+            ColorCode = AbleToOrder ? Green : Grey;
+
+            string BasketString = OldPreset == null ? "Add to Basket" : "Update Basket";
+            AddToBasketBtn.GetComponentInChildren<TextMeshProUGUI>().text = BasketString;
+            if (!GlobalOrderData.EVENT)
             {
-                bool AbleToOrder = true;
-                SingleDonationCost = BaseDonation;
-                foreach (var segment in Segments)
-                {
-                    SingleDonationCost += segment.Values.donationCost;
-                    if (!segment.Chosen) AbleToOrder = false;
-                }
-
-                var ColorCode = AbleToOrder ? Green : Grey;
-                AddToBasketBtn.GetComponent<Button>().enabled = AbleToOrder;
-                ColorUtility.TryParseHtmlString(ColorCode, out Color color);
-                AddToBasketBtn.GetComponent<Image>().color = color;
-
-                string BasketString = OldPreset == null ? "Add to Basket" : "Update Basket";
-                if (GlobalOrderData.EVENT)
-                    AddToBasketBtn.GetComponentInChildren<TextMeshProUGUI>().text = BasketString;
-                else
-                {
-                    var TotalDonationCost = SingleDonationCost * Quantity;
-                    AddToBasketBtn.GetComponentInChildren<TextMeshProUGUI>().text = $"{BasketString} - {TotalDonationCost:0.00}";
-                }
+                var TotalDonationCost = SingleDonationCost * Quantity;
+                AddToBasketBtn.GetComponentInChildren<TextMeshProUGUI>().text += $" - {TotalDonationCost:0.00}";
             }
-        });
+        }
+        ColorUtility.TryParseHtmlString(ColorCode, out Color color);
+        AddToBasketBtn.GetComponent<Image>().color = color;
+        AddToBasketBtn.GetComponent<Button>().enabled = AbleToOrder;
+    });
     public void OnEnable()
     {
         OldPreset = GlobalOrderData.Details;
@@ -70,25 +65,7 @@ public class ItemEntry : MonoBehaviour
 
         //DrinkImage.sprite = Resources.Load<Sprite>("Images/" + GlobalOrderData.ActiveItem) ?? Resources.Load<Sprite>("Images/Default");
 
-        StartCoroutine(GetTexture(GlobalOrderData.ActiveItem));
-        IEnumerator GetTexture(string texturePath, string suffix = ".png")
-        {
-            var www = UnityWebRequestTexture.GetTexture($"{GlobalOrderData.IMAGEREPO}{texturePath}.png");
-            yield return www.SendWebRequest();
-
-            if (www.result != UnityWebRequest.Result.Success)
-            {
-                if (suffix == ".png") StartCoroutine(GetTexture(texturePath, ".jpg"));
-                else DrinkImage.sprite = Resources.Load<Sprite>("Images/Default");
-                //DrinkImage.texture = Resources.Load<Texture2D>("Images/Default");
-            }
-            else
-            {
-                var tex = DownloadHandlerTexture.GetContent(www);
-                DrinkImage.sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), Vector2.zero);
-                //DrinkImage.texture = tex;
-            }
-        }
+        StartCoroutine(DrinkImage.GetTexture(GlobalOrderData.ActiveItem));
 
         var chunk = GlobalOrderData.ActiveItemChunk;
         Name.text = $"<b>{chunk[0]}</b>" + System.Environment.NewLine + $"<size=80%><color=\"grey\">{chunk[1]}</size>";
@@ -97,7 +74,7 @@ public class ItemEntry : MonoBehaviour
         if (GlobalOrderData.EVENT) BaseDonation = 0;
         else BaseDonationQty.text = $"{BaseDonation = float.Parse(chunk[2].ToString()):0.00}" + System.Environment.NewLine + "<i><size=60%><color=\"grey\">Base donation</size></i>";
 
-        for (int i = 3, c = -1; i < chunk.Count; i++)
+        for (int i = 4, c = -1; i < chunk.Count; i++)
         {
             if (string.IsNullOrWhiteSpace(chunk[i].ToString())) continue;
             var _segment = Instantiate(segment, Content.transform);
@@ -138,7 +115,7 @@ public class ItemEntry : MonoBehaviour
             {
                 Name = GlobalOrderData.ActiveItem,
                 Quantity = Quantity,
-                BaseDonationCost = SingleDonationCost
+                DonationCost = SingleDonationCost
             };
             foreach (var segment in Segments) data.Details.Add(segment.Values.name);
 

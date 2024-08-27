@@ -14,13 +14,16 @@ public class ExistingDrinksMenu : MonoBehaviour
         for (int i = 0; i < ExistingDrinkScroll.transform.childCount; i++)
             Destroy(ExistingDrinkScroll.transform.GetChild(i).gameObject);
 
-        var row = GlobalOrderData.ActiveItemChunk;
-        DrinkTitle.text = row[0].ToString();
+        DrinkTitle.text = GlobalOrderData.ActiveItem;
 
         DrinkCost.enabled = BaseDonationText.enabled = !GlobalOrderData.EVENT;
-        DrinkCost.text = $"{float.Parse(row[2].ToString()):0.00}";
+        if (!GlobalOrderData.EVENT)
+        {
+            var BaseCost = float.Parse(GlobalOrderData.ActiveItemChunk[2].ToString());
+            DrinkCost.text = $"{BaseCost:0.00}";
+        }
 
-        var orders = GlobalOrderData.InsideBasket[row[0].ToString()];
+        var orders = GlobalOrderData.ActiveBasket;
         foreach (var order in orders)
         {
             var existingDrink = Instantiate(ExistingDrinkPrefab, ExistingDrinkScroll.transform);
@@ -39,7 +42,7 @@ public class ExistingDrinksMenu : MonoBehaviour
             existingDrink.transform.GetChild(1).GetComponentInChildren<TextMeshProUGUI>().text = order.Quantity.ToString();
 
             existingDrink.transform.GetChild(2).GetComponent<TextMeshProUGUI>().enabled = !GlobalOrderData.EVENT;
-            float totalCost = order.Quantity * order.BaseDonationCost;
+            float totalCost = order.Quantity * order.DonationCost;
             existingDrink.transform.GetChild(2).GetComponent<TextMeshProUGUI>().text = $"{totalCost:0.00}";
         }
 
@@ -47,7 +50,7 @@ public class ExistingDrinksMenu : MonoBehaviour
         MakeAnotherButton.onClick.AddListener(() =>
         {
             GlobalOrderData.ClearActiveItem();
-            GlobalOrderData.ActiveItem = row[0].ToString();
+            GlobalOrderData.ActiveItem = DrinkTitle.text;
             GetComponentInParent<PageManager>().GoToPage(PageManager.Page.PageTitle.ITEM);
         });
 
