@@ -18,6 +18,8 @@ public class Order : MonoBehaviour //Basket orders
         GetComponent<Button>().onClick.AddListener(() =>
         {
             GlobalOrderData.ActiveItem = data.Name;
+            GlobalOrderData.ExistingQuantity = data.Quantity;
+            GlobalOrderData.Details = data.Details;
             GetComponentInParent<PageManager>().GoToPage(PageManager.Page.PageTitle.ITEM);
         });
     }
