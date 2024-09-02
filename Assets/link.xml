@@ -1,0 +1,10 @@
+<linker>
+	<assembly fullname="Google.Apis" preserve="all"/>
+	<assembly fullname="Google.Apis.Core" preserve="all"/>
+	<assembly fullname="Google.Apis.Auth" preserve="all"/>
+	<assembly fullname="Google.Apis.Sheets.v4" preserve="all"/>
+	<assembly fullname="Google.Apis.Auth.OAuth2" preserve="all"/>
+	<assembly fullname="Google.Apis.PlatformServices" preserve="all"/>
+	<assembly fullname="Google.Apis.Auth.PlatformServices" preserve="all"/>
+	<assembly fullname="Newtonsoft.Json" preserve="all"/>
+</linker>

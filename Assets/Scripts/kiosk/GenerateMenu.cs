@@ -44,6 +44,7 @@ public class GenerateMenu : MonoBehaviour
         ItemEntries.Clear();
 
         string CurrentCategory = string.Empty;
+        var _categories = new List<(string name, GameObject gameObject)>();
         for (int i = 0; i < values.Count; i++)
         {
             var row = values[i];
@@ -55,6 +56,7 @@ public class GenerateMenu : MonoBehaviour
             {
                 var category = Instantiate(CategoryPrefab, Scroll);
                 var CatName = CurrentCategory = value.Split(CategoryPrefix)[1];
+                _categories.Add((CatName, category));
 
                 category.GetComponentInChildren<TextMeshProUGUI>().text = CatName;
                 Categories.TryAdd(CatName, new List<GameObject>());
@@ -63,8 +65,8 @@ public class GenerateMenu : MonoBehaviour
                     bool Toggle = !Categories[CatName][0].activeSelf;
                     category.transform.GetChild(1).gameObject.SetActive(!Toggle);
                     category.transform.GetChild(2).gameObject.SetActive(!Toggle);
-                    category.transform.GetChild(3).gameObject.SetActive( Toggle);
-                    category.transform.GetChild(4).gameObject.SetActive( Toggle);
+                    category.transform.GetChild(3).gameObject.SetActive(Toggle);
+                    category.transform.GetChild(4).gameObject.SetActive(Toggle);
                     foreach (var item in Categories[CatName]) item.gameObject.SetActive(Toggle);
                 });
             }
@@ -73,8 +75,6 @@ public class GenerateMenu : MonoBehaviour
                 if (row[3].ToString() != "Y") continue; //Out of stock
 
                 var item = Instantiate(ItemEntryPrefab, Scroll);
-
-                //item.transform.GetChild(1).GetComponent<Image>().sprite = Resources.Load<Sprite>("Images/" + row[0].ToString()) ?? Resources.Load<Sprite>("Images/Default");
 
                 var image = item.transform.GetChild(1).GetComponent<Image>();
                 StartCoroutine(image.GetTexture(row[0].ToString()));
@@ -99,6 +99,14 @@ public class GenerateMenu : MonoBehaviour
                     if (GlobalOrderData.ActiveBasket.Count > 0) ExistingDrinksMenu.ShowExistingDrinks();
                     else GetComponentInParent<PageManager>().GoToPage(PageManager.Page.PageTitle.ITEM);
                 });
+            }
+        }
+        foreach (var category in _categories) //Remove empty categories
+        {
+            if (Categories[category.name].Count == 0)
+            {
+                Destroy(category.gameObject);
+                Categories.Remove(category.name);
             }
         }
     }
