@@ -22,7 +22,6 @@ public class TotalOrderView : MonoBehaviour
 {
     [SerializeField] private GameObject CustomerPrefab, BlackOut;
     [SerializeField] private RectTransform Scroll;
-    [SerializeField] private AudioClip NotificationSound;
     private readonly List<Customer> Customers = new List<Customer>();
     private int OldestIncompleteCustomerIndex = 0;
 
@@ -70,7 +69,7 @@ public class TotalOrderView : MonoBehaviour
             }
             GlobalOrderData.LatestCustomer += values.Count; //-1?
         }
-        if (NewCustomer) GetComponent<AudioSource>().PlayOneShot(NotificationSound);
+        if (NewCustomer) GetComponent<AudioSource>().PlayOneShot(GetComponent<AudioSource>().clip);
 
         for (var i = 0; i < Scroll.childCount; i++) Destroy(Scroll.GetChild(i).gameObject);
 
@@ -93,8 +92,8 @@ public class TotalOrderView : MonoBehaviour
 
             var customerPanel = Instantiate(CustomerPrefab, Scroll);
 
-            var green = new Color(0.3f, 0.7f, 0.4f);
-            var clear = new Color(1, 1, 1, 0.1f);
+            var green = new Color(0.3f, 0.7f, 0.4f,    1);
+            var clear = new Color(1,       1,    1, 0.1f);
             customerPanel.GetComponent<Image>().color = CompletedDrinks >= TotalDrinks ? green : clear;
 
             customerPanel.GetComponent<Button>().onClick.AddListener(() =>

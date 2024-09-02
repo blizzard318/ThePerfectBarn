@@ -31,8 +31,8 @@ public class CustomerMenu : MonoBehaviour
                     ColorUtility.TryParseHtmlString("#53AD5A", out Color green);
                     entry.GetComponent<Image>().color = isOn ? green : Color.clear;
                     drinkText.fontStyle = isOn ? FontStyles.Strikethrough : FontStyles.Normal;
-                    if (isOn) entry.transform.SetAsLastSibling();
-                    else entry.transform.SetAsFirstSibling();
+                    //if (isOn) entry.transform.SetAsLastSibling();
+                    //else entry.transform.SetAsFirstSibling();
                 };
                 entry.GetComponent<Button>().onClick.AddListener(() => function(!toggle.isOn));
                 function(i + 1 <= drink.Completed);

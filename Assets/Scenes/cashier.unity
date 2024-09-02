@@ -38,7 +38,6 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -1119,7 +1118,7 @@ MonoBehaviour:
   CustomerPrefab: {fileID: 4351679065933696636, guid: cfd7951c93ed9914783f61c04c5e1442, type: 3}
   BlackOut: {fileID: 1245340673}
   Scroll: {fileID: 166682918}
-  NotificationSound: {fileID: 0}
+  NotificationSound: {fileID: 8300000, guid: c7421836e480fe441baa45b5cdf3853a, type: 3}
 --- !u!82 &1000789924
 AudioSource:
   m_ObjectHideFlags: 0
